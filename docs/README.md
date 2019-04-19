@@ -5,6 +5,8 @@
 
 GraphQL client which allows to interact with graphql using ActiveRecord-like API
 
+Detailed documentation can be found at https://samesystem.github.io/active_graphql
+
 ## Installation
 
 Add this line to your application's Gemfile:
