@@ -30,7 +30,6 @@ class ActiveGraphql::Client
         it { is_expected.to be_success }
       end
 
-
       context 'when request fails' do
         before do
           allow(raw_client).to receive(:query).and_raise(Graphlient::Errors::GraphQLError, 'boom')

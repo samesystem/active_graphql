@@ -3,7 +3,7 @@
 module ActiveGraphql
   class Client
     module Adapters
-      # Client which makes API requests to same_authorizer
+      # Client which makes raw API requests to GraphQL server
       class GraphlientAdapter
         require 'graphlient'
 

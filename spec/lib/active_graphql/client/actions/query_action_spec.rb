@@ -21,6 +21,18 @@ RSpec.describe ActiveGraphql::Client::Actions::QueryAction do
     end
   end
 
+  describe '#inspect' do
+    subject(:inspect) { action.inspect }
+
+    it 'returns pretty info' do
+      expect(inspect).to eq(
+        '#<ActiveGraphql::Client::Actions::QueryAction ' \
+          'name: :findUser, input: {}, output: [], meta: {}' \
+          '>'
+      )
+    end
+  end
+
   describe '#find_by' do
     subject(:action) { initial_action.select(:id, :name) }
 

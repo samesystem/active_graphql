@@ -7,16 +7,26 @@ module ActiveGraphql
       class Action
         class InvalidActionError < StandardError; end
 
-        autoload :FormatOutputs, 'active_graphql/client/actions/action/format_outputs'
-        autoload :FormatInputs, 'active_graphql/client/actions/action/format_inputs'
+        require 'active_graphql/client/actions/action/format_outputs'
+        require 'active_graphql/client/actions/action/format_inputs'
 
-        attr_reader :name, :type, :output_values, :client, :input_attributes
+        attr_reader :name, :type, :output_values, :client, :input_attributes, :meta_attributes
 
-        def initialize(name:, client:, output_values: [], input_attributes: {})
+        def initialize(name:, client:, output_values: [], input_attributes: {}, meta_attributes: {})
           @name = name
           @output_values = output_values
           @input_attributes = input_attributes
+          @meta_attributes = meta_attributes
           @client = client
+        end
+
+        def inspect
+          "#<#{self.class} " \
+            "name: #{name.inspect}, " \
+            "input: #{input_attributes.inspect}, " \
+            "output: #{output_values.inspect}, " \
+            "meta: #{meta_attributes.inspect}" \
+            '>'
         end
 
         def where(**input_attributes)
@@ -30,6 +40,10 @@ module ActiveGraphql
 
         def response
           client.post(self)
+        end
+
+        def meta(new_attributes)
+          chain(meta_attributes: meta_attributes.merge(new_attributes))
         end
 
         def select(*array_outputs, **hash_outputs)
@@ -65,12 +79,12 @@ module ActiveGraphql
         end
 
         def assert_format
-          if output_values.empty?
-            raise(
-              InvalidActionError,
-              'at least one return value must be set. Do `query.select(:fields_to_return)` to do so'
-            )
-          end
+          return unless output_values.empty?
+
+          raise(
+            InvalidActionError,
+            'at least one return value must be set. Do `query.select(:fields_to_return)` to do so'
+          )
         end
 
         def chain(**new_values)
@@ -78,6 +92,7 @@ module ActiveGraphql
             name: name,
             output_values: output_values,
             input_attributes: input_attributes,
+            meta_attributes: meta_attributes,
             client: client,
             **new_values
           )

@@ -16,62 +16,127 @@ module ActiveGraphql
   #
   # Model expects that graphql has GraphqlRails CRUD actions with default naming (createRemoteUser, remoteUsers, etc.)
   module Model
+    require 'active_graphql/model/configuration'
+    require 'active_graphql/model/action_formatter'
+    require 'active_graphql/model/relation_proxy'
+    require 'active_support'
+    require 'active_support/core_ext/hash'
+    require 'active_support/core_ext/hash'
+    require 'active_model'
+
     extend ActiveSupport::Concern
 
-    included do
+    included do # rubocop:disable Metrics/BlockLength
+      include ActiveModel::Validations
+
+      validate :validate_graphql_errors
+
       attr_reader :attributes
+      attr_writer :graphql_errors
 
       def initialize(attributes)
         @attributes = attributes.deep_transform_keys { |it| it.to_s.underscore.to_sym }
       end
 
-      private
+      def update(params)
+        action_name = "update_#{self.class.active_graphql.resource_name}"
+        all_params = { id: id }.merge(params)
+
+        response = exec_graphql { |api| api.mutation(action_name).input(all_params) }
+        self.attributes = response.result.to_h
+        self.graphql_errors = response.errors
+        valid?
+      end
+
+      def update!(params)
+        success = update(params)
+        return true if success
+
+        error_message = (errors['graphql'] || errors.full_messages).first
+        raise RecordNotValidError, error_message
+      end
+
+      def attributes=(new_attributes)
+        formatted_new_attributes = new_attributes.deep_transform_keys { |it| it.to_s.underscore.to_sym }
+        @attributes = attributes.merge(formatted_new_attributes)
+      end
+
+      def destroy
+        action_name = "destroy_#{self.class.active_graphql.resource_name}"
+        response = exec_graphql { |api| api.mutation(action_name).input(id: id) }
+        response.success?
+      end
+
+      protected
+
+      def exec_graphql(*args, &block)
+        self.class.exec_graphql(*args, &block)
+      end
 
       def read_graphql_attribute(attribute_name)
         attributes[attribute_name.to_sym]
       end
+
+      private
+
+      def graphql_errors
+        @graphql_errors ||= []
+      end
+
+      def validate_graphql_errors
+        graphql_errors.each { |error| errors.add('graphql', error) }
+      end
     end
 
     class_methods do # rubocop:disable Metrics/BlockLength
-      delegate :first, :last, :count, :where, to: :all
+      delegate :first, :last, :limit, :count, :where, :find_each, to: :all
 
       def inherited(sublass)
-        sublass.instance_variable_set(:@graphql_url, controller_configuration.graphql_url)
+        sublass.instance_variable_set(:@active_graphql, active_graphql.dup)
       end
 
-      def graphql_url(url = nil)
-        @graphql_url = url if url
-        @graphql_url
-      end
-
-      def graphql_client
-        @graphql_client ||= ActiveGraphql::Client.new(url: graphql_url)
-      end
-
-      def graphql_attributes(*attributes, **complex_attributes)
-        return @graphql_attributes if attributes.empty?
-
-        @graphql_attributes = attributes + complex_attributes.map { |k, v| { k => v } }
-
-        (attributes + complex_attributes.keys).each do |attribute|
-          define_method(attribute) do
-            read_graphql_attribute(attribute)
+      def active_graphql
+        @active_graphql ||= ActiveGraphql::Model::Configuration.new
+        if block_given?
+          yield(@active_graphql)
+          @active_graphql.attributes.each do |attribute|
+            define_method(attribute) do
+              read_graphql_attribute(attribute)
+            end
           end
+        end
+        @active_graphql
+      end
+
+      def create(params)
+        action_name = "create_#{active_graphql.resource_name}"
+        response = exec_graphql { |api| api.mutation(action_name).input(params) }
+
+        new(response.result.to_h).tap do |record|
+          record.graphql_errors = response.errors unless response.success?
         end
       end
 
-      def graphql_resource_name(resource_name = nil)
-        @graphql_resource_name = resource_name if resource_name
-        @graphql_resource_name ||= name.demodulize.camelize(:lower)
-      end
+      def create!(params)
+        record = create(params)
 
-      def belongs_to(association)
-        @belongs_to ||= Set.new
-        @belongs_to += association.to_sym
+        return record if record.valid?
+
+        error_message = (record.errors['graphql'] || record.errors.full_messages).first
+        raise RecordNotValidError, error_message
       end
 
       def all
-        @all ||= ::ActiveGraphql::RelationProxy.new(self)
+        @all ||= ::ActiveGraphql::Model::RelationProxy.new(self)
+      end
+
+      def exec_graphql
+        formatter = active_graphql.formatter
+        api = active_graphql.graphql_client
+
+        raw_action = yield(api).output(*active_graphql.attributes)
+
+        formatter.call(raw_action).response
       end
     end
   end

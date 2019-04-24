@@ -53,15 +53,13 @@ class ActiveGraphql::Client::Actions::Action
 
       context 'when value is nested hash' do
         let(:outputs) do
-          [
-            {
-              some: {
-                deep: {
-                  value: %i[yes no maybe]
-                }
+          {
+            some: {
+              deep: {
+                value: %i[yes no maybe]
               }
             }
-          ]
+          }
         end
 
         it 'formats correctly' do

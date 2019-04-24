@@ -6,9 +6,9 @@ module ActiveGraphql
     module Actions
       class WrongTypeError < ActiveGraphql::Error; end
 
-      autoload :MutationAction, 'active_graphql/client/actions/query_action'
-      autoload :QueryAction, 'active_graphql/client/actions/mutation_action'
-      autoload :Action, 'active_graphql/client/actions/action'
+      require 'active_graphql/client/actions/action'
+      require 'active_graphql/client/actions/query_action'
+      require 'active_graphql/client/actions/mutation_action'
     end
   end
 end
