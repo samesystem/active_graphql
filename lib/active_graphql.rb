@@ -2,10 +2,13 @@
 
 require 'active_graphql/version'
 
+# nodoc
 module ActiveGraphql
   class Error < StandardError; end
+  class ResponseError < ActiveGraphql::Error; end
   class WrongTypeError < ActiveGraphql::Error; end
+  class RecordNotValidError < ActiveGraphql::Error; end
 
-  autoload :Client, 'active_graphql/client'
-  autoload :Model, 'active_graphql/model'
+  require 'active_graphql/client'
+  require 'active_graphql/model'
 end

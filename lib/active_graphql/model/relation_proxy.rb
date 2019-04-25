@@ -1,153 +1,205 @@
 # frozen_string_literal: true
 
 module ActiveGraphql
-  class RelationProxy
-    DEFAULT_BATCH_SIZE = 100
+  module Model
+    # transforms all AR-like queries in to graphql requests
+    class RelationProxy # rubocop:disable Metrics/ClassLength
+      require 'active_support/core_ext/module/delegation'
 
-    delegate :each, :map, :empty?, :any?, to: :to_a
+      DEFAULT_BATCH_SIZE = 100
 
-    def initialize(model, limit_number: nil, where_params: {}, offset_number: nil)
-      @model = model
-      @limit_number = limit_number
-      @where_params = where_params
-      @offset_number = offset_number
-    end
+      include Enumerable
 
-    def all
-      self
-    end
+      delegate :each, :map, to: :to_a
 
-    def limit(limit_number)
-      chain(limit_number: limit_number)
-    end
-
-    def offset(offset_number)
-      chain(offset_number: offset_number)
-    end
-
-    def where(new_where_params)
-      chain(where_params: where_params.merge(new_where_params.symbolize_keys))
-    end
-
-    def count
-      @size = graphql_client
-              .query(collection_resource_name.camelize(:lower))
-              .select(:total)
-              .result.total
-    end
-
-    def size
-      @size ||= count
-    end
-
-    def find(id)
-      params = graphql_client.query(model.graphql_resource_name.camelize(:lower))
-                             .select(model.graphql_attributes)
-                             .where(id: id)
-                             .result.to_h
-
-      model.new(params)
-    end
-
-    def last(number_of_items = 1)
-      collection = collection_query(last: number_of_items)
-
-      number_of_items == 1 ? collection.first : collection
-    end
-
-    def first(number_of_items = 1)
-      collection = collection_query(first: number_of_items)
-
-      number_of_items == 1 ? collection.first : collection
-    end
-
-    def pluck(*attributes)
-      map do |item|
-        attributes.map { |attribute| item.public_send(attribute) }
-      end
-    end
-
-    def find_each(batch_size: DEFAULT_BATCH_SIZE)
-      find_in_batches(batch_size: batch_size) do |items|
-        items.each { |item| yield(item) }
-      end
-      self
-    end
-
-    def find_in_batches(batch_size: DEFAULT_BATCH_SIZE)
-      offset_size = 0
-      page_items = limit(batch_size).offset(offset_size).first_batch
-
-      while page_items.any?
-        yield(page_items)
-        offset_size += batch_size
-        page_items = limit(batch_size).offset(offset_size).first_batch
+      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {})
+        @model = model
+        @limit_number = limit_number
+        @where_attributes = where_attributes
+        @offset_number = offset_number
+        @meta_attributes = meta_attributes
       end
 
-      self
-    end
+      def all
+        self
+      end
 
-    def to_a
-      return @to_a if @to_a
+      def limit(limit_number)
+        chain(limit_number: limit_number)
+      end
 
-      @to_a = []
-      find_in_batches { |batch| @to_a += batch }
-      @to_a
-    end
+      def offset(offset_number)
+        chain(offset_number: offset_number)
+      end
 
-    def first_batch
-      @first_batch ||= collection_query(graphql_params)
-    end
+      def where(new_where_attributes)
+        chain(where_attributes: where_attributes.merge(new_where_attributes.symbolize_keys))
+      end
 
-    def graphql_params
-      camelized_filter = where_params.transform_keys { |key| key.to_s.camelize(:lower) }
-      { filter: camelized_filter, first: limit_number, after: offset_number&.to_s }.compact
-    end
+      def meta(new_meta_attributes)
+        chain(meta_attributes: meta_attributes.merge(new_meta_attributes.symbolize_keys))
+      end
 
-    private
+      def count
+        @size = formatted_raw.select(:total).result.total
+      end
 
-    attr_reader :model, :limit_number, :where_params, :offset_number
+      def size
+        @size ||= count
+      end
 
-    def chain(
-      limit_number: send(:limit_number),
-      where_params: send(:where_params),
-      offset_number: send(:offset_number)
-    )
-      self.class.new(model, limit_number: limit_number, where_params: where_params, offset_number: offset_number)
-    end
+      def find(id) # rubocop:disable Metrics/AbcSize
+        action = formatted_action(
+          graphql_client.query(resource_name).select(*config.attributes).where(id: id)
+        )
 
-    def graphql_client
-      model.graphql_client
-    end
+        response = action.response
+        raise RecordNotFoundError unless action.response.result
 
-    def collection_resource_name
-      model.graphql_resource_name.to_s.underscore.pluralize
-    end
+        model.new(response.result!.to_h)
+      end
 
-    def formatted_query_params(params)
-      params.map do |key, val|
-        if val.is_a?(Hash)
-          "#{key}: { #{formatted_query_params(val)} }"
-        else
-          "#{key}: #{val.inspect}"
+      def last(number_of_items = 1)
+        paginated_raw = formatted_action(raw.meta(paginated: true))
+        result = paginated_raw.where(last: number_of_items).result
+        collection = decorate_paginated_result(result)
+
+        number_of_items == 1 ? collection.first : collection
+      end
+
+      def first(number_of_items = 1)
+        paginated_raw = formatted_action(raw.meta(paginated: true))
+        result = paginated_raw.where(first: number_of_items).result
+        collection = decorate_paginated_result(result)
+
+        number_of_items == 1 ? collection.first : collection
+      end
+
+      def pluck(*attributes)
+        map do |record|
+          if attributes.count > 1
+            attributes.map { |attribute| record.public_send(attribute) }
+          else
+            record.public_send(attributes.first)
+          end
         end
-      end.join(', ')
-    end
+      end
 
-    def collection_query(query_params)
-      raw_collection_query(query_params).map { |it| model.new(it) }
-    end
+      def find_each(batch_size: DEFAULT_BATCH_SIZE)
+        find_in_batches(batch_size: batch_size) do |items|
+          items.each { |item| yield(item) }
+        end
+        self
+      end
 
-    def graphql_collection_header(query_params)
-      params = formatted_query_params(query_params)
-      "#{collection_resource_name.camelize(:lower)}(#{params})"
-    end
+      def find_in_batches(batch_size: DEFAULT_BATCH_SIZE) # rubocop:disable Metrics/MethodLength
+        offset_size = 0
+        scope = limit(batch_size).meta(paginated: true).offset(offset_size)
 
-    def raw_collection_query(query_params)
-      graphql_client.query(collection_resource_name)
-                    .select(model.graphql_attributes)
-                    .where(query_params)
-                    .result.edges.map { |it| it.node.to_h }
+        items = scope.first_batch
+
+        while items.any?
+          yield(items)
+          break unless scope.next_page?
+
+          offset_size += batch_size
+          scope = scope.offset(offset_size)
+          items = scope.first_batch
+        end
+
+        self
+      end
+
+      def to_a
+        return @to_a if @to_a
+
+        @to_a = []
+        find_in_batches { |batch| @to_a += batch }
+        @to_a
+      end
+
+      def next_page?
+        raw_result.page_info.has_next_page
+      end
+
+      def first_batch
+        @first_batch ||= decorate_paginated_result(raw_result)
+      end
+
+      def raw_result
+        @raw_result ||= formatted_raw.result
+      end
+
+      def graphql_params
+        { filter: where_attributes.presence, first: limit_number, after: offset_number&.to_s }.compact
+      end
+
+      def to_graphql
+        formatted_raw.to_graphql
+      end
+
+      private
+
+      attr_reader :model, :limit_number, :where_attributes, :offset_number, :meta_attributes
+
+      def raw
+        @raw ||= begin
+          graphql_client
+            .query(resource_plural_name)
+            .meta(meta_attributes)
+            .select(config.attributes)
+            .where(graphql_params)
+        end
+      end
+
+      def formatted_action(action)
+        config.formatter.call(action)
+      end
+
+      def formatted_raw
+        formatted_action(raw)
+      end
+
+      def decorate_paginated_result(result)
+        result.edges.map { |it| model.new(it.node.to_h) }
+      end
+
+      def resource_plural_name
+        @resource_plural_name ||= begin
+          name = config.resource_plural_name&.to_s || resource_name.pluralize
+          name
+        end
+      end
+
+      def resource_name
+        @resource_name ||= begin
+          name = config.resource_name&.to_s || model.name.demodulize
+          name
+        end
+      end
+
+      def chain(
+        limit_number: send(:limit_number),
+        where_attributes: send(:where_attributes),
+        meta_attributes: send(:meta_attributes),
+        offset_number: send(:offset_number)
+      )
+        self.class.new(
+          model,
+          limit_number: limit_number,
+          where_attributes: where_attributes,
+          meta_attributes: meta_attributes,
+          offset_number: offset_number
+        )
+      end
+
+      def graphql_client
+        config.graphql_client
+      end
+
+      def config
+        model.active_graphql
+      end
     end
   end
 end

@@ -27,7 +27,7 @@ Or install it yourself as:
 
 You can fetch data from GraphQL in two different ways: using `ActiveGraphql::Client` or using `ActiveGraphql::Model`
 
-### ActiveGraphql::Client
+### [ActiveGraphql::Client](client.md)
 
 `ActiveGraphql::Client` is a client which allows you to make requests using ruby-friendly code:
 
@@ -39,7 +39,9 @@ client.query(:findUser).inputs(id: 1).outputs(:name, :avatar_url).result
 client.query(:findUser).select(:name, :avatar_url).where(id: 1).result
 ```
 
-### ActiveGraphql::Model
+Find out more how to use Client in [Client documentation](client.md)
+
+### [ActiveGraphql::Model](model.md)
 
 If you have well structured GraphQL endpoint, which has CRUD actions for each entity then you can interact with GraphQL endpoints using `ActiveGraphql::Model`.
 It allows you to have separate class for separate GraphQL entity, Here is an example:
@@ -55,8 +57,10 @@ In this case you can create ruby class like this:
 class User
   include ActiveGraphql::Model
 
-  graphql_url('http://example.com/graphql')
-  graphql_attributes :id, :first_name, :last_name, :created_at
+  active_graphql do |c|
+    c.url('http://example.com/graphql')
+    c.attributes :id, :first_name, :last_name, :created_at
+  end
 end
 ```
 
@@ -69,6 +73,8 @@ User.find(1) # find user with ID: 1
 User.first(2) # find first 2 users
 User.last(3) # find last 3 users
 ```
+
+Find out more how to use Model in [Model documentation](client.md)
 
 ## Development
 

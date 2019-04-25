@@ -2,6 +2,8 @@ PATH
   remote: .
   specs:
     active_graphql (0.1.0)
+      activemodel (>= 3.0.0)
+      activesupport (>= 3.0.0)
       graphlient (~> 0.3)
 
 GEM
@@ -22,7 +24,6 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     arel (9.0.0)
     ast (2.4.0)
-    bson (4.4.2)
     byebug (11.0.1)
     codecov (0.1.14)
       json
@@ -46,6 +47,9 @@ GEM
     graphql-client (0.14.0)
       activesupport (>= 3.0, < 6.0)
       graphql (~> 1.6)
+    graphql_rails (0.5.2)
+      activesupport (>= 4)
+      graphql (~> 1)
     hashdiff (0.3.8)
     i18n (1.6.0)
       concurrent-ruby (~> 1.0)
@@ -53,11 +57,6 @@ GEM
     json (2.2.0)
     method_source (0.9.2)
     minitest (5.11.3)
-    mongo (2.8.0)
-      bson (>= 4.4.2, < 5.0.0)
-    mongoid (7.0.2)
-      activemodel (>= 5.1, < 6.0.0)
-      mongo (>= 2.5.1, < 3.0.0)
     multipart-post (2.0.0)
     parallel (1.17.0)
     parser (2.6.2.1)
@@ -122,7 +121,7 @@ DEPENDENCIES
   activerecord
   bundler (~> 2.0)
   codecov
-  mongoid
+  graphql_rails (>= 0.5.2)
   pry-byebug
   rake (~> 10.0)
   rspec (~> 3.0)
