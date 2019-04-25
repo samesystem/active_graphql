@@ -56,6 +56,24 @@ RSpec.describe ActiveGraphql::Client::Actions::QueryAction do
     end
   end
 
+  describe '#where' do
+    context 'when "where" is used multiple times' do
+      it 'merges where values' do
+        where_action = action.where(a: 1).where(b: 2)
+        expect(where_action.input_attributes).to eq(a: 1, b: 2)
+      end
+    end
+  end
+
+  describe '#select' do
+    context 'when "where" is used multiple times' do
+      it 'merges where values' do
+        where_action = action.select(:a).select(:b)
+        expect(where_action.output_values).to eq(%i[a b])
+      end
+    end
+  end
+
   describe '#to_grapqhl' do
     context 'when no output field is set' do
       it 'raises exception' do

@@ -41,7 +41,7 @@ module ActiveGraphql
       end
 
       def count
-        @size = formatted_raw.select(:total).result.total
+        @size = formatted_raw.reselect(:total).result.total
       end
 
       def size

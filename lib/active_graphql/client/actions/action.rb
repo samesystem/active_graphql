@@ -29,8 +29,12 @@ module ActiveGraphql
             '>'
         end
 
-        def where(**input_attributes)
+        def rewhere(**input_attributes)
           chain(input_attributes: input_attributes)
+        end
+
+        def where(**extra_input_attributes)
+          rewhere(**input_attributes, **extra_input_attributes)
         end
         alias input where
 
@@ -46,9 +50,14 @@ module ActiveGraphql
           chain(meta_attributes: meta_attributes.merge(new_attributes))
         end
 
-        def select(*array_outputs, **hash_outputs)
+        def reselect(*array_outputs, **hash_outputs)
           outputs = join_array_and_hash(*array_outputs, **hash_outputs)
           chain(output_values: outputs)
+        end
+
+        def select(*array_outputs, **hash_outputs)
+          full_array_outputs = (output_values + array_outputs).uniq
+          reselect(*full_array_outputs, **hash_outputs)
         end
         alias output select
 
