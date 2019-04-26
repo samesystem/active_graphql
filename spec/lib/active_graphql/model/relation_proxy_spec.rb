@@ -118,6 +118,20 @@ module ActiveGraphql::Model
       end
     end
 
+    describe '#page' do
+      subject(:page) { relation_proxy.page(3, per_page: 3) }
+
+      it 'builds correct graphql' do
+        expect(page.to_graphql).to eq <<~GRAPHQL
+          query {
+            users(first: 3, after: "6") {
+              id, firstName
+            }
+          }
+        GRAPHQL
+      end
+    end
+
     describe '#find' do
       subject(:find) { relation_proxy.find(2) }
 
