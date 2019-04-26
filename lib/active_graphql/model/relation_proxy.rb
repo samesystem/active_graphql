@@ -5,6 +5,7 @@ module ActiveGraphql
     # transforms all AR-like queries in to graphql requests
     class RelationProxy # rubocop:disable Metrics/ClassLength
       require 'active_support/core_ext/module/delegation'
+      require 'active_graphql/model/find_in_batches'
 
       DEFAULT_BATCH_SIZE = 100
 
@@ -47,7 +48,14 @@ module ActiveGraphql
       end
 
       def count
-        @size = formatted_raw.reselect(:total).result.total
+        @size = begin
+          total_without_offset = [total - offset_number.to_i].max
+          [total_without_offset, limit_number].compact.min
+        end
+      end
+
+      def total
+        formatted_raw.reselect(:total).result.total
       end
 
       def size
@@ -98,22 +106,8 @@ module ActiveGraphql
         self
       end
 
-      def find_in_batches(batch_size: DEFAULT_BATCH_SIZE) # rubocop:disable Metrics/MethodLength
-        offset_size = 0
-        scope = limit(batch_size).meta(paginated: true).offset(offset_size)
-
-        items = scope.first_batch
-
-        while items.any?
-          yield(items)
-          break unless scope.next_page?
-
-          offset_size += batch_size
-          scope = scope.offset(offset_size)
-          items = scope.first_batch
-        end
-
-        self
+      def find_in_batches(*args, &block)
+        FindInBatches.call(self.meta(paginated: true), *args, &block)
       end
 
       def to_a
@@ -141,7 +135,7 @@ module ActiveGraphql
       end
 
       def to_graphql
-        formatted_raw.to_graphql
+        formatted_action(raw.meta(paginated: true)).to_graphql
       end
 
       private
