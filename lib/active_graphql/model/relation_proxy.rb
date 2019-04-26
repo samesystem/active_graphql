@@ -40,6 +40,12 @@ module ActiveGraphql
         chain(meta_attributes: meta_attributes.merge(new_meta_attributes.symbolize_keys))
       end
 
+      def page(page_number = nil, per_page: 100)
+        page_number = [page_number.to_i, 1].max
+        offset = (page_number - 1) * per_page
+        limit(per_page).offset(offset)
+      end
+
       def count
         @size = formatted_raw.reselect(:total).result.total
       end
