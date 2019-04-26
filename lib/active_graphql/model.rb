@@ -100,8 +100,10 @@ module ActiveGraphql
         if block_given?
           yield(@active_graphql)
           @active_graphql.attributes.each do |attribute|
-            define_method(attribute) do
-              read_graphql_attribute(attribute)
+            attribute_name = attribute.is_a?(Hash) ? attribute.keys.first : attribute
+
+            define_method(attribute_name) do
+              read_graphql_attribute(attribute_name)
             end
           end
         end

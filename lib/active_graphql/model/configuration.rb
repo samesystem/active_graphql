@@ -23,9 +23,10 @@ module ActiveGraphql
         @formatter ||= Model::ActionFormatter
       end
 
-      def attributes(*list)
+      def attributes(*list, **detailed_attributes)
         @attributes ||= []
         @attributes += list
+        @attributes += detailed_attributes.map(&:to_h)
       end
 
       def url(value = nil)
