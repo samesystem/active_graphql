@@ -44,7 +44,16 @@ module ActiveGraphql
       def page(page_number = nil, per_page: 100)
         page_number = [page_number.to_i, 1].max
         offset = (page_number - 1) * per_page
-        limit(per_page).offset(offset)
+        limit(per_page).offset(offset).meta(current_page: page_number, per_page: per_page)
+      end
+
+      def current_page
+        meta_attributes.fetch(:current_page, 1)
+      end
+
+      def total_pages
+        last_page = (total.to_f / meta_attributes.fetch(:per_page, 100)).ceil
+        [last_page, 1].max
       end
 
       def count
