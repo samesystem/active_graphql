@@ -89,7 +89,7 @@ module ActiveGraphql
     end
 
     class_methods do # rubocop:disable Metrics/BlockLength
-      delegate :first, :last, :limit, :count, :where, :find_each, to: :all
+      delegate :first, :last, :limit, :count, :where, :find_each, :find, to: :all
 
       def inherited(sublass)
         sublass.instance_variable_set(:@active_graphql, active_graphql.dup)
