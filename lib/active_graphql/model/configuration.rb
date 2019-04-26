@@ -26,8 +26,9 @@ module ActiveGraphql
       def attributes(*list, **detailed_attributes)
         @attributes ||= []
         @attributes += list
-        @attributes += detailed_attributes.map(&:to_h)
+        @attributes += detailed_attributes.map { |key, val| { key => val } }
       end
+      alias attribute attributes
 
       def url(value = nil)
         update_or_return_config(:url, value)

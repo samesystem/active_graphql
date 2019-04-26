@@ -6,13 +6,6 @@ require 'graphlient'
 module ActiveGraphql::Model
   # rubocop:disable RSpec/ExampleLength
   RSpec.describe RelationProxy do
-    shared_context 'with many records' do
-      before do
-        users = (1..101).map { |id| DummyUser.new(id: id, first_name: "fname#{id}", last_name: 'lname') }
-        allow(DummySchema).to receive(:users).and_return(users)
-      end
-    end
-
     include_context 'with DummySchema'
 
     subject(:relation_proxy) { described_class.new(model) }
@@ -81,6 +74,14 @@ module ActiveGraphql::Model
         it 'returns all records' do
           expect(to_a.size).to eq 101
         end
+
+        context 'when limit is set' do
+          subject(:to_a) { relation_proxy.limit(5).to_a }
+
+          it 'applies limit' do
+            expect(to_a.size).to eq 5
+          end
+        end
       end
     end
 
@@ -111,7 +112,7 @@ module ActiveGraphql::Model
         expect(where.to_graphql).to eq <<~GRAPHQL
           query {
             users(filter: { something: true }) {
-              id, firstName
+              edges { node { id, firstName } }, pageInfo { hasNextPage }
             }
           }
         GRAPHQL
@@ -125,7 +126,7 @@ module ActiveGraphql::Model
         expect(page.to_graphql).to eq <<~GRAPHQL
           query {
             users(first: 3, after: "6") {
-              id, firstName
+              edges { node { id, firstName } }, pageInfo { hasNextPage }
             }
           }
         GRAPHQL
