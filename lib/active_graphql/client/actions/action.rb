@@ -12,6 +12,8 @@ module ActiveGraphql
 
         attr_reader :name, :type, :output_values, :client, :input_attributes, :meta_attributes
 
+        delegate :result, :result!, to: :response
+
         def initialize(name:, client:, output_values: [], input_attributes: {}, meta_attributes: {})
           @name = name
           @output_values = output_values
@@ -37,10 +39,6 @@ module ActiveGraphql
           rewhere(**input_attributes, **extra_input_attributes)
         end
         alias input where
-
-        def result
-          response.graphql_object
-        end
 
         def response
           client.post(self)

@@ -10,7 +10,7 @@ RSpec.describe ActiveGraphql::Client::Actions::QueryAction do
   let(:authenticator_client) do
     instance_double(ActiveGraphql::Client::Adapters::GraphlientAdapter, post: response_mock)
   end
-  let(:response_mock) { instance_double(ActiveGraphql::Client::Response, graphql_object: nil) }
+  let(:response_mock) { instance_double(ActiveGraphql::Client::Response, result: nil) }
 
   describe '#response' do
     subject(:action) { initial_action.select(:id, :name).where(type: 'user') }

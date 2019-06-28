@@ -119,6 +119,36 @@ module ActiveGraphql::Model
       end
     end
 
+    describe '#order' do
+      subject(:order) { relation_proxy.order(something: :desc) }
+
+      context 'when order direction is given' do
+        it 'builds correct graphql' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users(order: { by: SOMETHING, direction: DESC }) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+
+      context 'when only field name is given' do
+        subject(:order) { relation_proxy.order(:something) }
+
+        it 'builds graphql with ASC order direction' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users(order: { by: SOMETHING, direction: ASC }) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+    end
+
     describe '#page' do
       subject(:page) { relation_proxy.page(3, per_page: 3) }
 
@@ -174,6 +204,34 @@ module ActiveGraphql::Model
 
       it 'calls block for each batch' do
         expect { |block| relation_proxy.find_in_batches(&block) }.to yield_control.twice
+      end
+    end
+
+    describe '#blank?' do
+      context 'when some records exist' do
+        it { is_expected.not_to be_blank }
+      end
+
+      context 'when no records exist' do
+        before do
+          allow(DummySchema).to receive(:users).and_return([])
+        end
+
+        it { is_expected.to be_blank }
+      end
+    end
+
+    describe '#empty?' do
+      context 'when some records exist' do
+        it { is_expected.not_to be_empty }
+      end
+
+      context 'when no records exist' do
+        before do
+          allow(DummySchema).to receive(:users).and_return([])
+        end
+
+        it { is_expected.to be_empty }
       end
     end
   end

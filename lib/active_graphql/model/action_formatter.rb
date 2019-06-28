@@ -24,7 +24,7 @@ module ActiveGraphql
           name: formatted_name,
           client: action.client,
           output_values: formatted_outputs,
-          input_attributes: formatted_inputs
+          input_attributes: formatted_inputs.symbolize_keys
         )
       end
 
@@ -37,13 +37,12 @@ module ActiveGraphql
       end
 
       def formatted_inputs
-        attributes = action.input_attributes.deep_transform_keys { |key| key.to_s.camelize(:lower) }
+        attributes = action.input_attributes.deep_transform_keys do |key|
+          key.to_s.starts_with?('__') ? key : key.to_s.camelize(:lower)
+        end
 
         if mutation?
-          {
-            'input' => attributes.except('id').presence,
-            'id' => attributes['id']
-          }.compact
+          { 'input' => attributes.except('id').presence, 'id' => attributes['id'] }.compact
         else
           attributes
         end

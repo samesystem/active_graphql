@@ -15,6 +15,20 @@ class User
 end
 ```
 
+Attributes also can be nested, like this:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attributes location: [:city, :country, :street]
+  end
+end
+
+User.find(3).location # { city: 'London', country: ... }
+```
+
 ### active_graphql.url
 
 Sets url where all GraphQL queries should go
@@ -118,6 +132,14 @@ Use `where` method in order to find multiple record:
 
 ```ruby
 users = User.where(name: 'John')
+```
+
+### order
+
+Use `order` when you need to sort results:
+
+```ruby
+users.order(created_at: :desc)
 ```
 
 ### find_each

@@ -13,12 +13,13 @@ module ActiveGraphql
 
       delegate :each, :map, to: :to_a
 
-      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {})
+      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: {})
         @model = model
         @limit_number = limit_number
         @where_attributes = where_attributes
         @offset_number = offset_number
         @meta_attributes = meta_attributes
+        @order_attributes = order_attributes
       end
 
       def all
@@ -84,7 +85,7 @@ module ActiveGraphql
 
       def last(number_of_items = 1)
         paginated_raw = formatted_action(raw.meta(paginated: true))
-        result = paginated_raw.where(last: number_of_items).result
+        result = paginated_raw.where(last: number_of_items).result!
         collection = decorate_paginated_result(result)
 
         number_of_items == 1 ? collection.first : collection
@@ -92,7 +93,7 @@ module ActiveGraphql
 
       def first(number_of_items = 1)
         paginated_raw = formatted_action(raw.meta(paginated: true))
-        result = paginated_raw.where(first: number_of_items).result
+        result = paginated_raw.where(first: number_of_items).result!
         collection = decorate_paginated_result(result)
 
         number_of_items == 1 ? collection.first : collection
@@ -116,7 +117,7 @@ module ActiveGraphql
       end
 
       def find_in_batches(*args, &block)
-        FindInBatches.call(self.meta(paginated: true), *args, &block)
+        FindInBatches.call(meta(paginated: true), *args, &block)
       end
 
       def to_a
@@ -140,16 +141,53 @@ module ActiveGraphql
       end
 
       def graphql_params
-        { filter: where_attributes.presence, first: limit_number, after: offset_number&.to_s }.compact
+        {
+          filter: where_attributes.presence,
+          order: order_attributes.presence,
+          first: limit_number,
+          after: offset_number&.to_s
+        }.compact
       end
 
       def to_graphql
         formatted_action(raw.meta(paginated: true)).to_graphql
       end
 
+      def order(order_params)
+        if order_params.is_a?(Hash)
+          order_by = order_params.keys.first
+          direction = order_params.values.first
+        else
+          order_by = order_params
+          direction = :asc
+        end
+
+        return chain(order_attributes: {}) if order_by.to_s.empty?
+
+        chain(
+          order_attributes: {
+            by: order_by.to_s.upcase,
+            direction: direction.to_s.upcase,
+            __keyword_attributes: %i[by direction]
+          }
+        )
+      end
+
+      def empty?
+        count.zero?
+      end
+
+      def blank?
+        empty?
+      end
+
+      def present?
+        !blank?
+      end
+
       private
 
-      attr_reader :model, :limit_number, :where_attributes, :offset_number, :meta_attributes
+      attr_reader :model, :limit_number, :where_attributes, :offset_number, :meta_attributes, :order_attributes
 
       def raw
         @raw ||= begin
@@ -191,14 +229,16 @@ module ActiveGraphql
         limit_number: send(:limit_number),
         where_attributes: send(:where_attributes),
         meta_attributes: send(:meta_attributes),
-        offset_number: send(:offset_number)
+        offset_number: send(:offset_number),
+        order_attributes: send(:order_attributes)
       )
         self.class.new(
           model,
           limit_number: limit_number,
           where_attributes: where_attributes,
           meta_attributes: meta_attributes,
-          offset_number: offset_number
+          offset_number: offset_number,
+          order_attributes: order_attributes
         )
       end
 
