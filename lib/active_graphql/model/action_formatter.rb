@@ -42,7 +42,10 @@ module ActiveGraphql
         end
 
         if mutation?
-          { 'input' => attributes.except('id').presence, 'id' => attributes['id'] }.compact
+          {
+            'input' => attributes.except('id').presence,
+            'id' => attributes['id']
+          }.compact
         else
           attributes
         end
@@ -65,7 +68,7 @@ module ActiveGraphql
             pageInfo: [:hasNextPage]
           }
         else
-          outputs
+          outputs.is_a?(Hash) ? outputs.symbolize_keys : outputs
         end
       end
 

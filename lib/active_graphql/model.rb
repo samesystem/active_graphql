@@ -73,8 +73,13 @@ module ActiveGraphql
         self.class.exec_graphql(*args, &block)
       end
 
-      def read_graphql_attribute(attribute_name)
-        attributes[attribute_name.to_sym]
+      def read_graphql_attribute(attribute)
+        value = attributes[attribute.name]
+        if attribute.decorate_with
+          send(attribute.decorate_with, value)
+        else
+          value
+        end
       end
 
       private
@@ -100,10 +105,8 @@ module ActiveGraphql
         if block_given?
           yield(@active_graphql)
           @active_graphql.attributes.each do |attribute|
-            attribute_name = attribute.is_a?(Hash) ? attribute.keys.first : attribute
-
-            define_method(attribute_name) do
-              read_graphql_attribute(attribute_name)
+            define_method(attribute.name) do
+              read_graphql_attribute(attribute)
             end
           end
         end
@@ -136,7 +139,7 @@ module ActiveGraphql
         formatter = active_graphql.formatter
         api = active_graphql.graphql_client
 
-        raw_action = yield(api).output(*active_graphql.attributes)
+        raw_action = yield(api).output(*active_graphql.attributes_graphql_output)
 
         formatter.call(raw_action).response
       end

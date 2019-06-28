@@ -74,7 +74,7 @@ module ActiveGraphql
 
       def find(id) # rubocop:disable Metrics/AbcSize
         action = formatted_action(
-          graphql_client.query(resource_name).select(*config.attributes).where(id: id)
+          graphql_client.query(resource_name).select(*config.attributes_graphql_output).where(id: id)
         )
 
         response = action.response
@@ -133,11 +133,11 @@ module ActiveGraphql
       end
 
       def first_batch
-        @first_batch ||= decorate_paginated_result(raw_result)
+        @first_batch ||= decorate_paginated_result(formatted_raw_response.result!)
       end
 
       def raw_result
-        @raw_result ||= formatted_raw.result
+        formatted_raw_response.result
       end
 
       def graphql_params
@@ -189,12 +189,16 @@ module ActiveGraphql
 
       attr_reader :model, :limit_number, :where_attributes, :offset_number, :meta_attributes, :order_attributes
 
+      def formatted_raw_response
+        @formatted_raw_response ||= formatted_raw.response
+      end
+
       def raw
         @raw ||= begin
           graphql_client
             .query(resource_plural_name)
             .meta(meta_attributes)
-            .select(config.attributes)
+            .select(config.attributes_graphql_output)
             .where(graphql_params)
         end
       end
