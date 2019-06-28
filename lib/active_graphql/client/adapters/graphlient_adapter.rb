@@ -9,7 +9,7 @@ module ActiveGraphql
 
         def initialize(config)
           @url = config[:url]
-          @headers = config[:headers] || {}
+          @adapter_config = config.except(:url)
         end
 
         def post(action)
@@ -21,10 +21,10 @@ module ActiveGraphql
 
         private
 
-        attr_reader :url, :headers
+        attr_reader :url, :adapter_config
 
         def graphql_client
-          @graphql_client ||= Graphlient::Client.new(url, headers: headers)
+          @graphql_client ||= Graphlient::Client.new(url, **adapter_config)
         end
       end
     end

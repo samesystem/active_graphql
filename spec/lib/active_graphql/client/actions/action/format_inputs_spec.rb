@@ -80,5 +80,15 @@ RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
         expect { call }.to raise_error(ActiveGraphql::Client::Actions::WrongTypeError)
       end
     end
+
+    context 'when value contains special __keyword_attributes field' do
+      context 'when value is symbol' do
+        let(:inputs) { { val: :YES, __keyword_attributes: [:val] } }
+
+        it 'convers Symbol values to strings' do
+          expect(call).to eq 'val: YES'
+        end
+      end
+    end
   end
 end

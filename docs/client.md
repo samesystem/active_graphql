@@ -8,6 +8,12 @@ to initialize graphql client, simply create new client instance with url:
 client = ActiveGraphql::Client.new(url: 'http://example.com/graphql')
 ```
 
+you can also provide extra options which will be accepted by addapter, like this:
+
+```ruby
+client = ActiveGraphql::Client.new(url: 'http://example.com/graphql', headers: {}, schema_path: '...')
+```
+
 ## query and mutation actions
 
 ```ruby
