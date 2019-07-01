@@ -68,16 +68,11 @@ class User
   include ActiveGraphql::Model
 
   active_graphql do |c|
-    c.attribute :id
-    c.attribute :location, [:lat, :lan], decorate_with: :decorate_location
-  end
-
-  def decorate_location(location_value)
-    Location.new(lat: location_value[:lat], lan: location_value[:lan])
+    c.attribute :name
   end
 end
 
-User.find(3).first_name # => some name returned from graphql
+User.find(3).name # => "John"
 ```
 
 #### nested attributes
@@ -210,3 +205,18 @@ User.all.find_each do |user|
 end
 ```
 
+### paginate
+
+you can also paginate records:
+
+```ruby
+User.paginate(page: 1, per_page: 3)
+```
+
+### page
+
+you can also paginate records:
+
+```ruby
+User.page(1)
+```
