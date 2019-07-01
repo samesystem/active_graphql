@@ -150,10 +150,24 @@ module ActiveGraphql::Model
     end
 
     describe '#page' do
-      subject(:page) { relation_proxy.page(3, per_page: 3) }
+      subject(:page) { relation_proxy.page(3) }
 
       it 'builds correct graphql' do
         expect(page.to_graphql).to eq <<~GRAPHQL
+          query {
+            users(first: 100, after: "200") {
+              edges { node { id, firstName } }, pageInfo { hasNextPage }
+            }
+          }
+        GRAPHQL
+      end
+    end
+
+    describe '#paginate' do
+      subject(:paginate) { relation_proxy.paginate(page: 3, per_page: 3) }
+
+      it 'builds correct graphql' do
+        expect(paginate.to_graphql).to eq <<~GRAPHQL
           query {
             users(first: 3, after: "6") {
               edges { node { id, firstName } }, pageInfo { hasNextPage }
