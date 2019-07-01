@@ -4,6 +4,24 @@ module ActiveGraphql
   module Model
     # stores all information for how to handle graphql requets for model
     class Configuration
+      class Attribute
+        attr_reader :name, :nesting, :decorate_with
+
+        def initialize(name, nesting: nil, decorate_with: nil)
+          @name = name.to_sym
+          @nesting = nesting
+          @decorate_with = decorate_with
+        end
+
+        def to_graphql_output
+          nesting ? { name => nesting } : name
+        end
+      end
+
+      def initialize
+        @attributes = []
+      end
+
       def initialize_copy(other)
         super
         @attributes = other.attributes.dup
@@ -24,11 +42,18 @@ module ActiveGraphql
       end
 
       def attributes(*list, **detailed_attributes)
-        @attributes ||= []
-        @attributes += list
-        @attributes += detailed_attributes.map { |key, val| { key => val } }
+        list.each { |name| attribute(name) }
+        detailed_attributes.each { |key, val| attribute(key, val) }
+        @attributes
       end
-      alias attribute attributes
+
+      def attributes_graphql_output
+        attributes.map(&:to_graphql_output)
+      end
+
+      def attribute(name, nesting = nil, decorate_with: nil)
+        @attributes << Attribute.new(name, nesting: nesting, decorate_with: decorate_with)
+      end
 
       def url(value = nil)
         update_or_return_config(:url, value)

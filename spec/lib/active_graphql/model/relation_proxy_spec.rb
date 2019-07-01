@@ -221,6 +221,20 @@ module ActiveGraphql::Model
       end
     end
 
+    describe '#present?' do
+      context 'when some records exist' do
+        it { is_expected.to be_present }
+      end
+
+      context 'when no records exist' do
+        before do
+          allow(DummySchema).to receive(:users).and_return([])
+        end
+
+        it { is_expected.not_to be_present }
+      end
+    end
+
     describe '#empty?' do
       context 'when some records exist' do
         it { is_expected.not_to be_empty }

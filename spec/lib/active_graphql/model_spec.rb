@@ -153,5 +153,34 @@ module ActiveGraphql
         it { is_expected.to be false }
       end
     end
+
+    describe '#read_graphql_attribute' do
+      it 'returns attribute from response' do
+        expect(model.find(1).first_name).to eq 'John'
+      end
+
+      context 'when attribute has decorator' do
+        subject(:model) do
+          Class.new(ParentDummyModel) do
+            def self.name
+              'User'
+            end
+
+            active_graphql do |c|
+              c.resource_name :user
+              c.attribute :first_name, decorate_with: :upcase
+            end
+
+            def upcase(name)
+              name.upcase
+            end
+          end
+        end
+
+        it 'decorates attribute from response' do
+          expect(model.find(1).first_name).to eq 'JOHN'
+        end
+      end
+    end
   end
 end

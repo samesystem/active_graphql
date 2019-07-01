@@ -59,6 +59,64 @@ end
 User.find(3).first_name # => some name returned from graphql
 ```
 
+### active_graphql.attribute
+
+Sets attribute which can be fetched from graphql
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attribute :id
+    c.attribute :location, [:lat, :lan], decorate_with: :decorate_location
+  end
+
+  def decorate_location(location_value)
+    Location.new(lat: location_value[:lat], lan: location_value[:lan])
+  end
+end
+
+User.find(3).first_name # => some name returned from graphql
+```
+
+#### nested attributes
+
+You can have nested attributes. Nested values will be returned as hash:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attribute :id
+    c.attribute :location, [:lat, :long]
+  end
+end
+
+User.find(3).location #=> { lat: 25.0, long: 26.0 }
+```
+
+#### decorated attributes
+
+You can use decorator methods in order to modify model attribute values. It's very in combination with nested values
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attribute :name, decorate_with: :make_fancy_name
+  end
+
+  def make_fancy_name(original_name)
+    "Mr. #{original_name}"
+  end
+end
+
+User.find(3).name #=> "Mr. John"
+```
+
 ### active_graphql.resource_name
 
 Sets attributes which can be fetched from graphql
