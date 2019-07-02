@@ -3,7 +3,7 @@ PATH
   specs:
     active_graphql (0.1.0)
       activemodel (>= 3.0.0)
-      activesupport (>= 3.0.0)
+      activesupport (>= 4.0.0)
       graphlient (~> 0.3)
 
 GEM
@@ -57,7 +57,7 @@ GEM
     json (2.2.0)
     method_source (0.9.2)
     minitest (5.11.3)
-    multipart-post (2.0.0)
+    multipart-post (2.1.1)
     parallel (1.17.0)
     parser (2.6.2.1)
       ast (~> 2.4.0)

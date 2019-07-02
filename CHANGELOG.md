@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added: relation.empty?, relation.blank?, relation.present? methods
 * Added: fields now can be marked as "keywords"
 * Added: it's possible to set order for relation
+* Added: it's possible to query using "or" method
+* Added: it's possible merge multiple queries
+* Added: class methods can be used as a scope (like in ActiveRecord)
 
 ## [0.1.0] - 2019-04-25
 

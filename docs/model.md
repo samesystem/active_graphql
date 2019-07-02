@@ -187,6 +187,34 @@ Use `where` method in order to find multiple record:
 users = User.where(name: 'John')
 ```
 
+### merge
+
+Use `merge` method in order to merge multiple queries:
+
+```ruby
+# same as User.where(name: 'John', surname: 'Doe') :
+users = User.where(name: 'John').merge(User.where(surname: 'Doe'))
+```
+
+### or
+
+Use `or` method in order to query using "or" predicate:
+
+```ruby
+# same as User.where(or: { name: 'John', surname: 'Doe' }) :
+users = User.where(name: 'John').or(User.where(surname: 'Doe'))
+```
+
+Keep in mind that your endpoint must support filtering by "or" key like this:
+
+```graphql
+  query {
+    users(filter: { or: { name: 'John', surname: 'Doe' } }) {
+      ...
+    }
+  }
+```
+
 ### order
 
 Use `order` when you need to sort results:
@@ -219,4 +247,34 @@ you can also paginate records:
 
 ```ruby
 User.page(1)
+```
+
+### defining custom queries
+
+You can define your custom queries by adding class method, like this:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attributes :id
+  end
+
+  def self.with_custom
+    where(custom: true)
+  end
+end
+
+User.where(id: 1).with_custom
+```
+
+this will produce GraphQL:
+
+```graphql
+query {
+  users(filter: { id: 1, custom: true } ) {
+    id
+  }
+}
 ```
