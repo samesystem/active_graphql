@@ -6,10 +6,13 @@ module ActiveGraphql
     class RelationProxy # rubocop:disable Metrics/ClassLength
       require 'active_support/core_ext/module/delegation'
       require 'active_graphql/model/find_in_batches'
+      require 'active_graphql/model/build_or_relation'
 
       DEFAULT_BATCH_SIZE = 100
 
       include Enumerable
+
+      attr_reader :where_attributes
 
       delegate :each, :map, to: :to_a
 
@@ -35,7 +38,15 @@ module ActiveGraphql
       end
 
       def where(new_where_attributes)
-        chain(where_attributes: where_attributes.merge(new_where_attributes.symbolize_keys))
+        chain(where_attributes: where_attributes.deep_merge(new_where_attributes.symbolize_keys))
+      end
+
+      def merge(other_query)
+        where(other_query.where_attributes)
+      end
+
+      def unscope(where:)
+        chain(where_attributes: where_attributes.except(where))
       end
 
       def meta(new_meta_attributes)
@@ -125,11 +136,12 @@ module ActiveGraphql
       end
 
       def to_a
-        return @to_a if @to_a
+        return @to_a if defined?(@to_a)
 
-        @to_a = []
-        find_in_batches { |batch| @to_a += batch }
-        @to_a
+        list = []
+        find_in_batches { |batch| list += batch }
+
+        @to_a = list
       end
 
       def next_page?
@@ -189,9 +201,25 @@ module ActiveGraphql
         !blank?
       end
 
+      def or(relation)
+        BuildOrRelation.call(self, relation)
+      end
+
+      def respond_to_missing?(method_name, *args, &block)
+        model.respond_to?(method_name) || super
+      end
+
+      def method_missing(method_name, *args, &block)
+        if model.respond_to?(method_name)
+          merge(model.public_send(method_name, *args, &block))
+        else
+          super
+        end
+      end
+
       private
 
-      attr_reader :model, :limit_number, :where_attributes, :offset_number, :meta_attributes, :order_attributes
+      attr_reader :model, :limit_number, :offset_number, :meta_attributes, :order_attributes
 
       def formatted_raw_response
         @formatted_raw_response ||= formatted_raw.response

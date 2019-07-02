@@ -21,7 +21,6 @@ module ActiveGraphql
     require 'active_graphql/model/relation_proxy'
     require 'active_support'
     require 'active_support/core_ext/hash'
-    require 'active_support/core_ext/hash'
     require 'active_model'
 
     extend ActiveSupport::Concern

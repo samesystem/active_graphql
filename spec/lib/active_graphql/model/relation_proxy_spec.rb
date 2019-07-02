@@ -68,6 +68,17 @@ module ActiveGraphql::Model
         expect(to_a.first).to be_a model
       end
 
+      context 'when error happened before' do
+        before do
+          allow(FindInBatches).to receive(:call).and_raise(StandardError, 'ups')
+        end
+
+        it 'raises error again', :aggregate_failures do
+          expect { relation_proxy.to_a }.to raise_error('ups')
+          expect { relation_proxy.to_a }.to raise_error('ups')
+        end
+      end
+
       context 'when there are many records' do
         include_context 'with many records'
 
@@ -260,6 +271,95 @@ module ActiveGraphql::Model
         end
 
         it { is_expected.to be_empty }
+      end
+    end
+
+    describe '#or' do
+      subject(:relation_proxy_with_or) do
+        or_queries.inject(relation_proxy.where(name: 'John')) do |final, query|
+          final.or(query)
+        end
+      end
+
+      let(:or_queries) do
+        [
+          relation_proxy.where(surname: 'Doe'),
+          relation_proxy.where(surname: 'Smith'),
+          relation_proxy.where(surname: 'Willson')
+        ]
+      end
+
+      context 'when or query has same key as "main" query' do
+        let(:or_queries) do
+          [relation_proxy.where(name: 'Lisa')]
+        end
+
+        it 'moves "main" query key to "or" block' do
+          expect(relation_proxy_with_or.where_attributes).to eq(
+            or: { name: %w[John Lisa] }
+          )
+        end
+      end
+
+      context 'with multiple or queries' do
+        it 'joins or queries' do
+          expect(relation_proxy_with_or.where_attributes).to eq(
+            or: {
+              name: 'John',
+              surname: %w[Doe Smith Willson]
+            }
+          )
+        end
+      end
+    end
+
+    describe '#merge' do
+      subject(:merge) { left_query.merge(right_query) }
+
+      let(:left_query) { relation_proxy.where(deep: { left: true }) }
+      let(:right_query) { relation_proxy.where(deep: { right: true }) }
+
+      it 'merges deep nested where attributes' do
+        expect(merge.where_attributes).to eq(deep: { left: true, right: true })
+      end
+    end
+
+    describe '#method_missing' do
+      subject(:method_missing) { relation_proxy.where(name: 'John').public_send(method_name) }
+
+      let(:method_name) { :custom_query }
+
+      let(:model) do
+        Class.new do
+          include ActiveGraphql::Model
+
+          active_graphql do |c|
+            c.url 'http://example.com/graphql'
+            c.attributes :name, :custom
+          end
+
+          def self.name
+            'User'
+          end
+
+          def self.custom_query
+            where(custom: true)
+          end
+        end
+      end
+
+      context 'when model has defined class method with query' do
+        it 'executes class method in query context' do
+          expect(method_missing.where_attributes).to eq(name: 'John', custom: true)
+        end
+      end
+
+      context 'when method does not exist' do
+        let(:method_name) { :does_not_exist }
+
+        it 'raises NoMethodError' do
+          expect { method_missing }.to raise_error(NoMethodError)
+        end
       end
     end
   end
