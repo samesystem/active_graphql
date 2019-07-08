@@ -3,6 +3,7 @@
 require 'graphql'
 require 'graphql_rails'
 require 'active_record'
+require_relative 'models/dummy_user'
 
 class DummySchema < GraphQL::Schema
   module PlainCursorEncoder

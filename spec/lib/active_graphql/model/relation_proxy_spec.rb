@@ -137,7 +137,7 @@ module ActiveGraphql::Model
         it 'builds correct graphql' do
           expect(order.to_graphql).to eq <<~GRAPHQL
             query {
-              users(order: { by: SOMETHING, direction: DESC }) {
+              users(order: [{ by: SOMETHING, direction: DESC }]) {
                 edges { node { id, firstName } }, pageInfo { hasNextPage }
               }
             }
@@ -151,7 +151,35 @@ module ActiveGraphql::Model
         it 'builds graphql with ASC order direction' do
           expect(order.to_graphql).to eq <<~GRAPHQL
             query {
-              users(order: { by: SOMETHING, direction: ASC }) {
+              users(order: [{ by: SOMETHING, direction: ASC }]) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+
+      context 'when multiple fields are given' do
+        subject(:order) { relation_proxy.order(:something, something1: :asc, something2: :desc) }
+
+        it 'builds graphql with ASC order direction' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users(order: [{ by: SOMETHING, direction: ASC }, { by: SOMETHING1, direction: ASC }, { by: SOMETHING2, direction: DESC }]) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+
+      context 'when fields are nil' do
+        subject(:order) { relation_proxy.order(nil) }
+
+        it 'builds graphql without order attribute' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users {
                 edges { node { id, firstName } }, pageInfo { hasNextPage }
               }
             }

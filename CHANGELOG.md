@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Added: it's possible to query using "or" method
 * Added: it's possible merge multiple queries
 * Added: class methods can be used as a scope (like in ActiveRecord)
+* Added: it's possible to order by multiple atttributes
 
 ## [0.1.0] - 2019-04-25
 

@@ -169,24 +169,35 @@ module ActiveGraphql
         formatted_action(raw.meta(paginated: true)).to_graphql
       end
 
-      def order(order_params)
-        if order_params.is_a?(Hash)
-          order_by = order_params.keys.first
-          direction = order_params.values.first
-        else
-          order_by = order_params
-          direction = :asc
+      def order(*order_params)
+        order_params_attributes = order_params.flat_map do |order_param|
+          ordering_attributes(order_param)
         end
+        order_params_attributes.compact!
 
-        return chain(order_attributes: {}) if order_by.to_s.empty?
+        return chain(order_attributes: {}) if order_params_attributes.to_s.empty?
 
         chain(
-          order_attributes: {
-            by: order_by.to_s.upcase,
-            direction: direction.to_s.upcase,
-            __keyword_attributes: %i[by direction]
-          }
+          order_attributes: order_params_attributes
         )
+      end
+
+      def ordering_attributes(order_param)
+        if order_param.is_a?(Hash)
+          order_param.map { |param, direction| order_param_attributes(param, direction) }
+        else
+          order_param_attributes(order_param, :asc)
+        end
+      end
+
+      def order_param_attributes(order_by, direction)
+        return if order_by.blank?
+
+        {
+          by: order_by.to_s.upcase,
+          direction: direction.to_s.upcase,
+          __keyword_attributes: %i[by direction]
+        }
       end
 
       def empty?
