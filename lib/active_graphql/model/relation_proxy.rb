@@ -16,7 +16,7 @@ module ActiveGraphql
 
       delegate :each, :map, to: :to_a
 
-      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: {})
+      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: [])
         @model = model
         @limit_number = limit_number
         @where_attributes = where_attributes
@@ -169,24 +169,30 @@ module ActiveGraphql
         formatted_action(raw.meta(paginated: true)).to_graphql
       end
 
-      def order(order_params)
-        if order_params.is_a?(Hash)
-          order_by = order_params.keys.first
-          direction = order_params.values.first
+      def order(*order_params)
+        chain(order_attributes: order_params_attributes(order_params))
+      end
+
+      def order_params_attributes(order_params)
+        send(:order_attributes) + order_params.compact
+          .flat_map { |order_param| ordering_attributes(order_param) }
+          .select(&:compact)
+      end
+
+      def ordering_attributes(order_param)
+        if order_param.is_a?(Hash)
+          order_param.map { |param, direction| order_param_attributes(param, direction) }
         else
-          order_by = order_params
-          direction = :asc
+          order_param_attributes(order_param, :asc)
         end
+      end
 
-        return chain(order_attributes: {}) if order_by.to_s.empty?
-
-        chain(
-          order_attributes: {
-            by: order_by.to_s.upcase,
-            direction: direction.to_s.upcase,
-            __keyword_attributes: %i[by direction]
-          }
-        )
+      def order_param_attributes(order_by, direction)
+        {
+          by: order_by&.to_s&.upcase,
+          direction: direction&.to_s&.upcase,
+          __keyword_attributes: %i[by direction]
+        }
       end
 
       def empty?
