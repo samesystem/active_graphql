@@ -186,6 +186,34 @@ module ActiveGraphql::Model
           GRAPHQL
         end
       end
+
+      context 'when order by field is nil' do
+        subject(:order) { relation_proxy.order(nil => :asc) }
+
+        it 'builds graphql with null order by attribute' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users(order: [{ by: null, direction: ASC }]) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+
+      context 'when order method is chained with another order' do
+        subject(:order) { relation_proxy.order(:something1).order(something2: :desc) }
+
+        it 'builds graphql with combined ordering attributes' do
+          expect(order.to_graphql).to eq <<~GRAPHQL
+            query {
+              users(order: [{ by: SOMETHING1, direction: ASC }, { by: SOMETHING2, direction: DESC }]) {
+                edges { node { id, firstName } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
     end
 
     describe '#page' do

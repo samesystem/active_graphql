@@ -16,7 +16,7 @@ module ActiveGraphql
 
       delegate :each, :map, to: :to_a
 
-      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: {})
+      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: [])
         @model = model
         @limit_number = limit_number
         @where_attributes = where_attributes
@@ -170,16 +170,13 @@ module ActiveGraphql
       end
 
       def order(*order_params)
-        order_params_attributes = order_params.flat_map do |order_param|
-          ordering_attributes(order_param)
-        end
-        order_params_attributes.compact!
+        chain(order_attributes: order_params_attributes(order_params))
+      end
 
-        return chain(order_attributes: {}) if order_params_attributes.to_s.empty?
-
-        chain(
-          order_attributes: order_params_attributes
-        )
+      def order_params_attributes(order_params)
+        send(:order_attributes) + order_params.compact
+          .flat_map { |order_param| ordering_attributes(order_param) }
+          .select(&:compact)
       end
 
       def ordering_attributes(order_param)
@@ -191,11 +188,9 @@ module ActiveGraphql
       end
 
       def order_param_attributes(order_by, direction)
-        return if order_by.blank?
-
         {
-          by: order_by.to_s.upcase,
-          direction: direction.to_s.upcase,
+          by: order_by&.to_s&.upcase,
+          direction: direction&.to_s&.upcase,
           __keyword_attributes: %i[by direction]
         }
       end
