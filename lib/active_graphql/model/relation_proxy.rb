@@ -89,7 +89,10 @@ module ActiveGraphql
 
       def find(id) # rubocop:disable Metrics/AbcSize
         action = formatted_action(
-          graphql_client.query(resource_name).select(*config.attributes_graphql_output).where(id: id)
+          graphql_client
+            .query(resource_name)
+            .select(*config.attributes_graphql_output)
+            .where(config.primary_key => id)
         )
 
         response = action.response

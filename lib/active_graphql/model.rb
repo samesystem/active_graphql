@@ -39,7 +39,7 @@ module ActiveGraphql
 
       def update(params)
         action_name = "update_#{self.class.active_graphql.resource_name}"
-        all_params = { id: id }.merge(params)
+        all_params = { primary_key => primary_key_value }.merge(params)
 
         response = exec_graphql { |api| api.mutation(action_name).input(all_params) }
         self.attributes = response.result.to_h
@@ -62,12 +62,12 @@ module ActiveGraphql
 
       def destroy
         action_name = "destroy_#{self.class.active_graphql.resource_name}"
-        response = exec_graphql { |api| api.mutation(action_name).input(id: id) }
+        response = exec_graphql { |api| api.mutation(action_name).input(primary_key => primary_key_value) }
         response.success?
       end
 
       def reload
-        self.attributes = self.class.find(id).attributes
+        self.attributes = self.class.find(primary_key_value).attributes
         self
       end
 
@@ -94,6 +94,14 @@ module ActiveGraphql
 
       def validate_graphql_errors
         graphql_errors.each { |error| errors.add('graphql', error) }
+      end
+
+      def primary_key
+        self.class.active_graphql.primary_key
+      end
+
+      def primary_key_value
+        send(primary_key)
       end
     end
 

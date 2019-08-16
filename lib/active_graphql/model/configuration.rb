@@ -67,6 +67,10 @@ module ActiveGraphql
         update_or_return_config(:resource_plural_name, value)
       end
 
+      def primary_key(value = :id)
+        update_or_return_config(:primary_key, value.to_sym)
+      end
+
       private
 
       def update_or_return_config(name, value)

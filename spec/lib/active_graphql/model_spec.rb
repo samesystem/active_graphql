@@ -159,28 +159,21 @@ module ActiveGraphql
     describe '#reload' do
       subject(:reload) { record.reload }
 
-      let(:record) { model.new(id: 1, first_name: first_name) }
-      let(:first_name) { 'John' }
+      let(:record) { model.new(id: 1, first_name: 'John Doe') }
+      let(:new_name) { 'John Travolta' }
 
       context 'when request is successful' do
-        let(:new_first_name) { 'Elon' }
-
         before do
           allow(record.class).to receive(:find).with(record.id).and_call_original
-          record.attributes.merge!(first_name: new_first_name)
+          reload
         end
 
         it 'fetches same instance' do
-          expect(reload.id).to eq(record.id)
+          expect(reload.id.to_i).to eq(record.id.to_s)
         end
 
         it 'makes find query' do
-          reload
           expect(record.class).to have_received(:find)
-        end
-
-        it 'resets values' do
-          expect { reload }.to change(record, :first_name).from(new_first_name).to(first_name)
         end
       end
     end
