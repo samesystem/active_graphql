@@ -66,6 +66,11 @@ module ActiveGraphql
         response.success?
       end
 
+      def reload
+        self.attributes = self.class.find(id).attributes
+        self
+      end
+
       protected
 
       def exec_graphql(*args, &block)

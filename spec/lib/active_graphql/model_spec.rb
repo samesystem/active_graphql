@@ -23,6 +23,8 @@ module ActiveGraphql
           c.resource_name :user
           c.attributes :id, :first_name
         end
+
+        attr_writer :first_name
       end
     end
 
@@ -151,6 +153,35 @@ module ActiveGraphql
         let(:record) { model.new(id: -10) }
 
         it { is_expected.to be false }
+      end
+    end
+
+    describe '#reload' do
+      subject(:reload) { record.reload }
+
+      let(:record) { model.new(id: 1, first_name: first_name) }
+      let(:first_name) { 'John' }
+
+      context 'when request is successful' do
+        let(:new_first_name) { 'Elon' }
+
+        before do
+          allow(record.class).to receive(:find).with(record.id).and_call_original
+          record.attributes.merge!(first_name: new_first_name)
+        end
+
+        it 'fetches same instance' do
+          expect(reload.id).to eq(record.id)
+        end
+
+        it 'makes find query' do
+          reload
+          expect(record.class).to have_received(:find)
+        end
+
+        it 'resets values' do
+          expect { reload }.to change(record, :first_name).from(new_first_name).to(first_name)
+        end
       end
     end
 
