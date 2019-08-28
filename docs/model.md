@@ -278,3 +278,59 @@ query {
   }
 }
 ```
+
+## Requirements for GraphQL server side
+
+In order to make active_graphql work, server must met some conditions.
+
+### Requirements for Model#find methods
+
+In order to make Model#find work, server must have resource in singular form with single `id: ID!` argument.
+
+Example: `user(id: ID!)`
+
+### Requirements for Model#all, Model#find_each methods
+
+In order to make Model#all and Model#find_each work, server must have resource in plural form and also response should be paginated.
+
+Example: 
+```
+users(first: Integer, last: Integer, before: String, after: String) {
+  edges {
+    node {
+      ...
+    }
+  }
+}
+```
+
+### Requirements for Model#where, Model#find_by methods
+
+In order to make Model#where and Model#find_by work, server must have resource in plural form with `filter: SomeFilterInput` argument. Also resource must match requirements for Model#all too (see previous section)
+
+Example: 
+```
+users(filter: UserFilterInput) {
+  edges {
+    node {
+      ...
+    }
+  }
+}
+```
+
+### Requirements for Model#count
+
+In order to make Model#where and Model#find_by work, server must have resource in plural form. This resource must have `total:Integer` **output** field:
+
+Example: 
+```
+users() {
+  total
+  edges {
+    node {
+      ...
+    }
+  }
+}
+```
