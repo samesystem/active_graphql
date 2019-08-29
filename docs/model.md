@@ -283,6 +283,19 @@ query {
 
 In order to make active_graphql work, server must met some conditions.
 
+### Naming requirements
+
+Resource, attribute and field names must be in camelcase
+
+#### Resource name requirements for CRUD actions
+
+Let's say we have `BlogPost` resource, so CRUD actions should be named like this:
+- `blogPost(id: ID!)` (aka, `show` action)
+- `blogPosts(filter: FilterInput)` (aka, `index` action)
+- `createBlogPost(input: SomeCreateInput!)` (aka, `create` action)
+- `updateBlogPost(id: ID!, input: SomeUpdateInput!)` (aka, `update` action)
+- `destroyBlogPost(id: ID!)` (aka, `destroy` action)
+
 ### Requirements for Model#find methods
 
 In order to make Model#find work, server must have resource in singular form with single `id: ID!` argument.
@@ -310,6 +323,37 @@ In order to make Model#where and Model#find_by work, server must have resource i
 
 Example: 
 ```
+type UsersFilterInput {
+  firstName: String!
+  lastName: String!
+}
+
+users(filter: UserFilterInput) {
+  edges {
+    node {
+      ...
+    }
+  }
+}
+```
+
+### Requirements for Model#or method
+
+In order to make Model#or resouce must match requirements for `Model#where` method. Also `filter` input must have `or` argument
+
+Example: 
+```
+type UsersFilterInput {
+  or: UsersOrFilterInput
+  groupId: [ID!],
+  name: String!
+}
+
+type UsersOrFilterInput {
+  groupId: [ID!],
+  name: String!
+}
+
 users(filter: UserFilterInput) {
   edges {
     node {
