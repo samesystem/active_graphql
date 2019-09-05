@@ -20,6 +20,7 @@ module ActiveGraphql
 
       def initialize
         @attributes = []
+        @primary_key = :id
       end
 
       def initialize_copy(other)
@@ -29,7 +30,6 @@ module ActiveGraphql
         @url = other.url.dup
         @resource_name = other.resource_name.dup
         @resource_plural_name = other.resource_plural_name.dup
-        @primary_key = :id
       end
 
       def graphql_client(client = nil)

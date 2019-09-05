@@ -22,7 +22,7 @@ class DummyUser
     c.attribute :first_names, type: '[ID!]'
   end
 
-  attr_accessor :first_name, :last_name, :id
+  attr_accessor :first_name, :last_name, :id, :parent_id
 
   def initialize(params)
     params.each { |field, val| public_send("#{field}=", val) }

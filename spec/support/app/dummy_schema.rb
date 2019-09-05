@@ -18,34 +18,38 @@ class DummySchema < GraphQL::Schema
 
   def self.users
     [%w[John Doe], %w[Ana Smith], %w[Bob Willson]].map.with_index do |(first_name, last_name), i|
-      DummyUser.new(id: i + 1, first_name: first_name, last_name: last_name)
+      DummyUser.new(id: i + 1, first_name: first_name, last_name: last_name, parent_id: i)
     end
   end
 
   class QueryType < GraphQL::Schema::Object
     field :user, DummyUser.graphql.graphql_type, null: false, method: :user do
-      description 'Find invoice'
       argument :id, Integer, required: true
     end
 
+    field :child, DummyUser.graphql.graphql_type, null: false, method: :child do
+      argument :parent_id, Integer, required: true
+    end
+
     field :createUser, DummyUser.graphql.graphql_type, null: false, method: :create_user do
-      description 'Find invoice'
       argument :id, Integer, required: true
     end
 
     field :updateUser, DummyUser.graphql.graphql_type, null: false, method: :update_user do
-      description 'Find invoice'
       argument :id, Integer, required: true
     end
 
     field :destroyUser, DummyUser.graphql.graphql_type, null: false, method: :destroy_user do
-      description 'Find invoice'
       argument :id, Integer, required: true
     end
 
     field :users, DummyUser.graphql.connection_type, null: true do
       description 'Find invoice'
       argument :filter, DummyUser.graphql.input(:filter).graphql_input_type, required: false
+    end
+
+    def child(parent_id:)
+      DummySchema.users.detect { |user| user.parent_id == parent_id }
     end
 
     def user(id:)

@@ -245,10 +245,34 @@ module ActiveGraphql::Model
     end
 
     describe '#find' do
-      subject(:find) { relation_proxy.find(2) }
+      subject(:find) { relation_proxy.find(1) }
 
-      it 'returns correct item' do
-        expect(find.id).to eq '2'
+      context 'without custom primary_key' do
+        it 'returns correct item' do
+          expect(find.id).to eq '1'
+        end
+      end
+
+      context 'with custom primary key' do
+        let(:model) do
+          Class.new do
+            include ActiveGraphql::Model
+
+            active_graphql do |c|
+              c.url 'http://example.com/graphql'
+              c.attributes :id, :first_name
+              c.primary_key :parent_id
+            end
+
+            def self.name
+              'Child'
+            end
+          end
+        end
+
+        it 'returns correct item' do
+          expect(find.id).to eq '2'
+        end
       end
     end
 
