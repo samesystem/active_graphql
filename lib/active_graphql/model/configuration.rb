@@ -20,6 +20,7 @@ module ActiveGraphql
 
       def initialize
         @attributes = []
+        @primary_key = :id
       end
 
       def initialize_copy(other)
@@ -65,6 +66,10 @@ module ActiveGraphql
 
       def resource_plural_name(value = nil)
         update_or_return_config(:resource_plural_name, value)
+      end
+
+      def primary_key(value = nil)
+        update_or_return_config(:primary_key, value&.to_sym)
       end
 
       private
