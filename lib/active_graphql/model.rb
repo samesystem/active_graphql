@@ -151,7 +151,10 @@ module ActiveGraphql
         formatter = active_graphql.formatter
         api = active_graphql.graphql_client
 
-        raw_action = yield(api).output(*active_graphql.attributes_graphql_output)
+        raw_action = \
+          yield(api)
+          .output(*active_graphql.attributes_graphql_output)
+          .meta(primary_key: active_graphql.primary_key)
 
         formatter.call(raw_action).response
       end

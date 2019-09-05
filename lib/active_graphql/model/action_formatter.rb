@@ -32,6 +32,10 @@ module ActiveGraphql
 
       attr_reader :action
 
+      def primary_key
+        action.meta_attributes.fetch(:primary_key, 'id').to_s
+      end
+
       def formatted_name
         action.name.camelize(:lower)
       end
@@ -42,13 +46,17 @@ module ActiveGraphql
         end
 
         if mutation?
-          {
-            'input' => attributes.except('id').presence,
-            'id' => attributes['id']
-          }.compact
+          formatted_mutation_inputs(attributes)
         else
           attributes
         end
+      end
+
+      def formatted_mutation_inputs(attributes)
+        {
+          'input' => attributes.except(primary_key).presence,
+          primary_key => attributes[primary_key]
+        }.compact
       end
 
       def mutation?
