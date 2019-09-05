@@ -129,6 +129,22 @@ end
 User.where(name: 'John').to_graphql # => "query { adminUsers(name: "John") { id } }"
 ```
 
+### active_graphql.primary_key
+
+By default primary key is `id`, but you can change it like this:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.primary_key :email
+  end
+end
+
+User.find('john@example.com') # will execute in GraphQL: 'query { user(email: "john@example.com") }'
+```
+
 ## Methods
 
 ### find
