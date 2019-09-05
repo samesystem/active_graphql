@@ -29,6 +29,7 @@ module ActiveGraphql
         @url = other.url.dup
         @resource_name = other.resource_name.dup
         @resource_plural_name = other.resource_plural_name.dup
+        @primary_key = :id
       end
 
       def graphql_client(client = nil)
@@ -67,8 +68,8 @@ module ActiveGraphql
         update_or_return_config(:resource_plural_name, value)
       end
 
-      def primary_key(value = :id)
-        update_or_return_config(:primary_key, value.to_sym)
+      def primary_key(value = nil)
+        update_or_return_config(:primary_key, value&.to_sym)
       end
 
       private
