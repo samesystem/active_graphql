@@ -2,7 +2,7 @@
 
 ## Setup
 
-To create graphql model, you need to include `Model` module in your ruby class like this:
+To create graphql model, you need to include `ActiveGraphql::Model` module in your ruby class like this:
 
 ```ruby
 class User
