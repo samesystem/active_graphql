@@ -32,7 +32,20 @@ class ActiveGraphql::Client
 
       context 'when request fails' do
         before do
-          allow(raw_client).to receive(:query).and_raise(Graphlient::Errors::GraphQLError, 'boom')
+          graphql_error = Class.new(Graphlient::Errors::GraphQLError) do
+            attr_reader :errors
+
+            def initialize(message)
+              @message = message
+              @errors = [message]
+            end
+
+            def to_s
+              errors.join("\n")
+            end
+          end
+
+          allow(raw_client).to receive(:query).and_raise(graphql_error, 'boom')
         end
 
         it 'returns Response instance' do

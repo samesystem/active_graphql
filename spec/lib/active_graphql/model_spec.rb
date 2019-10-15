@@ -79,7 +79,7 @@ module ActiveGraphql
         let(:first_name) { 'invalid' }
 
         it 'raises error' do
-          expect { create }.to raise_error(RecordNotValidError, 'invalid user')
+          expect { create }.to raise_error(Errors::RecordNotValidError, 'invalid user')
         end
       end
     end
@@ -135,7 +135,7 @@ module ActiveGraphql
         let(:new_attribute_value) { 'invalid' }
 
         it 'raises error' do
-          expect { update }.to raise_error(RecordNotValidError, 'invalid user')
+          expect { update }.to raise_error(Errors::RecordNotValidError, 'invalid user')
         end
       end
     end

@@ -245,11 +245,13 @@ module ActiveGraphql::Model
     end
 
     describe '#find' do
-      subject(:find) { relation_proxy.find(1) }
+      subject(:find) { relation_proxy.find(item_id) }
+
+      let(:item_id) { 1 }
 
       context 'without custom primary_key' do
         it 'returns correct item' do
-          expect(find.id).to eq '1'
+          expect(find.id).to eq item_id.to_s
         end
       end
 
@@ -272,6 +274,14 @@ module ActiveGraphql::Model
 
         it 'returns correct item' do
           expect(find.id).to eq '2'
+        end
+      end
+
+      context 'when item is not found' do
+        let(:item_id) { 0 }
+
+        it 'raises error' do
+          expect { find }.to raise_error(ActiveGraphql::Errors::RecordNotFoundError)
         end
       end
     end

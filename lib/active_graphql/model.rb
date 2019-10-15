@@ -52,7 +52,7 @@ module ActiveGraphql
         return true if success
 
         error_message = (errors['graphql'] || errors.full_messages).first
-        raise RecordNotValidError, error_message
+        raise Errors::RecordNotValidError, error_message
       end
 
       def attributes=(new_attributes)
@@ -140,7 +140,7 @@ module ActiveGraphql
         return record if record.valid?
 
         error_message = (record.errors['graphql'] || record.errors.full_messages).first
-        raise RecordNotValidError, error_message
+        raise Errors::RecordNotValidError, error_message
       end
 
       def all
