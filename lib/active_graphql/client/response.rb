@@ -32,7 +32,7 @@ module ActiveGraphql
       def errors
         return [] if graphql_error.nil?
 
-        graphql_error.errors.to_h.values
+        graphql_error.errors.values.flatten
       end
 
       private

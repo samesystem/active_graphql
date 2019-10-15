@@ -5,7 +5,9 @@ module ActiveGraphql
     module Actions
       # handles all action details which are specific for mutation type request
       class MutationAction < Action
-        class UnsuccessfullRequestError < ActiveGraphql::Error; end
+        require 'active_graphql/errors'
+
+        class UnsuccessfullRequestError < ActiveGraphql::Errors::Error; end
 
         def type
           :mutation

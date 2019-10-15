@@ -7,6 +7,7 @@ module ActiveGraphql
       require 'active_support/core_ext/module/delegation'
       require 'active_graphql/model/find_in_batches'
       require 'active_graphql/model/build_or_relation'
+      require 'active_graphql/errors'
 
       DEFAULT_BATCH_SIZE = 100
 
@@ -96,7 +97,7 @@ module ActiveGraphql
         )
 
         response = action.response
-        raise RecordNotFoundError unless action.response.result
+        raise Errors::RecordNotFoundError unless action.response.result
 
         model.new(response.result!.to_h)
       end
