@@ -130,6 +130,20 @@ module ActiveGraphql::Model
       end
     end
 
+    describe '#select' do
+      subject(:select) { relation_proxy.select(:first_name) }
+
+      it 'builds correct graphql' do
+        expect(select.to_graphql).to eq <<~GRAPHQL
+          query {
+            users {
+              edges { node { firstName } }, pageInfo { hasNextPage }
+            }
+          }
+        GRAPHQL
+      end
+    end
+
     describe '#order' do
       subject(:order) { relation_proxy.order(something: :desc) }
 
