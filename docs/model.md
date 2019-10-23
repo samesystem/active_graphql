@@ -265,6 +265,42 @@ you can also paginate records:
 User.page(1)
 ```
 
+### Selecting certain fields
+
+You can select only attributes which you want to be selected from model, like this:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.url 'http://example.com/graphql'
+    c.attributes :id, :first_name, location: %i[street city], name: :full_name
+  end
+
+  def self.main_data
+    select(:first_name, location: :city, name: :full_name)
+  end
+end
+
+User.main_data
+```
+
+This will produce GraphQL:
+```graphql
+query {
+  users {
+    firstName
+    location {
+      city
+    }
+    name {
+      fullName
+    }
+  }
+}
+```
+
 ### defining custom queries
 
 You can define your custom queries by adding class method, like this:
