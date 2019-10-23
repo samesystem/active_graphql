@@ -153,7 +153,6 @@ module ActiveGraphql::Model
             active_graphql do |c|
               c.url 'http://example.com/graphql'
               c.attributes :id, :first_name, location: %i[street city], name: :full_name
-              c.primary_key :parent_id
             end
 
             def self.name
