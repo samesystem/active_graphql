@@ -47,7 +47,6 @@ module ActiveGraphql
         full_array_outputs = (output_values + array_outputs).uniq
         reselect(*full_array_outputs, **hash_outputs)
       end
-      alias output select
 
       def reselect(*array_outputs, **hash_outputs)
         outputs = join_array_and_hash(*array_outputs, **hash_outputs)
@@ -55,11 +54,7 @@ module ActiveGraphql
       end
 
       def select_attributes
-        output_values.present? ? (output_values & config.attributes_graphql_output) : config.attributes_graphql_output
-      end
-
-      def join_array_and_hash(*array, **hash)
-        array + hash.map { |k, v| { k => v } }
+        output_values.presence || config.attributes_graphql_output
       end
 
       def merge(other_query)
@@ -316,6 +311,10 @@ module ActiveGraphql
 
       def config
         model.active_graphql
+      end
+
+      def join_array_and_hash(*array, **hash)
+        array + hash.map { |k, v| { k => v } }
       end
     end
   end
