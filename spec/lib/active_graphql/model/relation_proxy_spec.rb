@@ -130,6 +130,49 @@ module ActiveGraphql::Model
       end
     end
 
+    describe '#select' do
+      subject(:select) { relation_proxy.select(:first_name) }
+
+      it 'builds correct graphql' do
+        expect(select.to_graphql).to eq <<~GRAPHQL
+          query {
+            users {
+              edges { node { firstName } }, pageInfo { hasNextPage }
+            }
+          }
+        GRAPHQL
+      end
+
+      context 'with a little bit complex query' do
+        subject(:select) { relation_proxy.select(:first_name, location: :city, name: :full_name) }
+
+        let(:model) do
+          Class.new do
+            include ActiveGraphql::Model
+
+            active_graphql do |c|
+              c.url 'http://example.com/graphql'
+              c.attributes :id, :first_name, location: %i[street city], name: :full_name
+            end
+
+            def self.name
+              'User'
+            end
+          end
+        end
+
+        it 'builds correct graphql' do
+          expect(select.to_graphql).to eq <<~GRAPHQL
+            query {
+              users {
+                edges { node { firstName, location { city }, name { fullName } } }, pageInfo { hasNextPage }
+              }
+            }
+          GRAPHQL
+        end
+      end
+    end
+
     describe '#order' do
       subject(:order) { relation_proxy.order(something: :desc) }
 

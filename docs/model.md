@@ -322,7 +322,7 @@ Example: `user(id: ID!)`
 
 In order to make Model#all and Model#find_each work, server must have resource in plural form and also response should be paginated.
 
-Example: 
+Example:
 ```
 users(first: Integer, last: Integer, before: String, after: String) {
   edges {
@@ -337,7 +337,7 @@ users(first: Integer, last: Integer, before: String, after: String) {
 
 In order to make Model#where and Model#find_by work, server must have resource in plural form with `filter: SomeFilterInput` argument. Also resource must match requirements for Model#all too (see previous section)
 
-Example: 
+Example:
 ```
 type UsersFilterInput {
   firstName: String!
@@ -357,7 +357,7 @@ users(filter: UserFilterInput) {
 
 In order to make Model#or resouce must match requirements for `Model#where` method. Also `filter` input must have `or` argument
 
-Example: 
+Example:
 ```
 type UsersFilterInput {
   or: UsersOrFilterInput
@@ -383,7 +383,7 @@ users(filter: UserFilterInput) {
 
 In order to make Model#where and Model#find_by work, server must have resource in plural form. This resource must have `total:Integer` **output** field:
 
-Example: 
+Example:
 ```
 users() {
   total

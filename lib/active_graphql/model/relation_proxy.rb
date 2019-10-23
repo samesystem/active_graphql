@@ -13,17 +13,18 @@ module ActiveGraphql
 
       include Enumerable
 
-      attr_reader :where_attributes
+      attr_reader :where_attributes, :output_values
 
       delegate :each, :map, to: :to_a
 
-      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: [])
+      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: [], output_values: [])
         @model = model
         @limit_number = limit_number
         @where_attributes = where_attributes
         @offset_number = offset_number
         @meta_attributes = meta_attributes
         @order_attributes = order_attributes
+        @output_values = output_values
       end
 
       def all
@@ -40,6 +41,20 @@ module ActiveGraphql
 
       def where(new_where_attributes)
         chain(where_attributes: where_attributes.deep_merge(new_where_attributes.symbolize_keys))
+      end
+
+      def select(*array_outputs, **hash_outputs)
+        full_array_outputs = (output_values + array_outputs).uniq
+        reselect(*full_array_outputs, **hash_outputs)
+      end
+
+      def reselect(*array_outputs, **hash_outputs)
+        outputs = join_array_and_hash(*array_outputs, **hash_outputs)
+        chain(output_values: outputs)
+      end
+
+      def select_attributes
+        output_values.presence || config.attributes_graphql_output
       end
 
       def merge(other_query)
@@ -92,7 +107,7 @@ module ActiveGraphql
         action = formatted_action(
           graphql_client
             .query(resource_name)
-            .select(*config.attributes_graphql_output)
+            .select(*select_attributes)
             .where(config.primary_key => id)
         )
 
@@ -240,7 +255,7 @@ module ActiveGraphql
           graphql_client
             .query(resource_plural_name)
             .meta(meta_attributes)
-            .select(config.attributes_graphql_output)
+            .select(select_attributes)
             .where(graphql_params)
         end
       end
@@ -276,7 +291,8 @@ module ActiveGraphql
         where_attributes: send(:where_attributes),
         meta_attributes: send(:meta_attributes),
         offset_number: send(:offset_number),
-        order_attributes: send(:order_attributes)
+        order_attributes: send(:order_attributes),
+        output_values: send(:output_values)
       )
         self.class.new(
           model,
@@ -284,7 +300,8 @@ module ActiveGraphql
           where_attributes: where_attributes,
           meta_attributes: meta_attributes,
           offset_number: offset_number,
-          order_attributes: order_attributes
+          order_attributes: order_attributes,
+          output_values: output_values
         )
       end
 
@@ -294,6 +311,10 @@ module ActiveGraphql
 
       def config
         model.active_graphql
+      end
+
+      def join_array_and_hash(*array, **hash)
+        array + hash.map { |k, v| { k => v } }
       end
     end
   end
