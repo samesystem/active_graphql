@@ -331,6 +331,38 @@ query {
 }
 ```
 
+### mutate
+
+You can define your custom mutations by adding instance method, like this:
+
+```ruby
+class User
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.attributes :id, :first_name, :last_name
+  end
+
+  def update_name(first_name, last_name)
+    mutate(:update_name, input: { first_name: 'Fancy', last_name: 'Pants' })
+  end
+end
+
+User.last.update_name('Fancy', 'Pants')
+```
+
+This will produce GraphQL:
+```graphql
+mutation {
+  updateName(id: 99, input: { firstName: 'Fancy', lastName: 'Pants' }) {
+    id
+    firstName
+    lastName
+    ...
+  }
+}
+```
+
 ## Requirements for GraphQL server side
 
 In order to make active_graphql work, server must met some conditions.
