@@ -37,14 +37,17 @@ module ActiveGraphql
         @attributes = attributes.deep_transform_keys { |it| it.to_s.underscore.to_sym }
       end
 
-      def update(params)
-        action_name = "update_#{self.class.active_graphql.resource_name}"
+      def mutate(action_name, params = {})
         all_params = { primary_key => primary_key_value }.merge(params)
-
-        response = exec_graphql { |api| api.mutation(action_name).input(all_params) }
+        response = exec_graphql { |api| api.mutation(action_name.to_s).input(all_params) }
         self.attributes = response.result.to_h
         self.graphql_errors = response.errors
         valid?
+      end
+
+      def update(params)
+        action_name = "update_#{self.class.active_graphql.resource_name}"
+        mutate(action_name, params)
       end
 
       def update!(params)

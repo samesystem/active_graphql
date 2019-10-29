@@ -61,7 +61,7 @@ class DummySchema < GraphQL::Schema
     end
   end
 
-  class MytationType < GraphQL::Schema::Object
+  class MutationType < GraphQL::Schema::Object
     field :createUser, DummyUser.graphql.graphql_type, null: false, method: :create_user do
       description 'Find invoice'
       argument :input, DummyUser.graphql.input.graphql_input_type, required: true
@@ -76,6 +76,12 @@ class DummySchema < GraphQL::Schema
     field :destroyUser, DummyUser.graphql.graphql_type, null: false, method: :destroy_user do
       description 'Find invoice'
       argument :id, Integer, required: true
+    end
+
+    field :forceUserUpdate, DummyUser.graphql.graphql_type, null: false, method: :force_user_update do
+      description 'Force user update'
+      argument :id, Integer, required: true
+      argument :input, DummyUser.graphql.input.graphql_input_type, required: false
     end
 
     def update_user(id:, input:)
@@ -95,9 +101,15 @@ class DummySchema < GraphQL::Schema
 
       DummyUser.new(id: rand(1_000..999_999), **input.to_h)
     end
+
+    def force_user_update(id:, input: {})
+      raise(GraphQL::ExecutionError, 'invalid user') if input[:first_name] == 'invalid'
+
+      DummyUser.new(input.to_h.merge(id: id))
+    end
   end
 
   cursor_encoder(PlainCursorEncoder)
   query(QueryType)
-  mutation(MytationType)
+  mutation(MutationType)
 end

@@ -84,6 +84,45 @@ module ActiveGraphql
       end
     end
 
+    describe '#mutate' do
+      subject(:mutate) { record.mutate(action_name, params) }
+
+      let(:action_name) { :force_user_update }
+      let(:params) { { first_name: new_attribute_value } }
+      let(:record) { model.new(id: 1) }
+
+      context 'when request is successful' do
+        let(:new_attribute_value) { 'valid' }
+
+        it 'returns true' do
+          expect(mutate).to eq(true)
+        end
+
+        it 'keeps record valid' do
+          expect { mutate }.not_to change(record, :valid?).from(true)
+        end
+
+        context 'without params' do
+          subject(:mutate) { record.mutate(action_name) }
+
+          it 'returns true' do
+            expect(mutate).to eq(true)
+          end
+        end
+      end
+
+      context 'when request fails' do
+        let(:new_attribute_value) { 'invalid' }
+        let(:params) { { first_name: new_attribute_value } }
+
+        it { is_expected.to be false }
+
+        it 'sets record invalid' do
+          expect { mutate }.to change(record, :valid?).from(true).to(false)
+        end
+      end
+    end
+
     describe '#update' do
       subject(:update) { record.update(first_name: new_attribute_value) }
 
