@@ -155,7 +155,10 @@ module ActiveGraphql
 
       def create(params)
         action_name = "create_#{active_graphql.resource_name}"
-        response = exec_graphql { |api| api.mutation(action_name).input(params) }
+        response = exec_graphql do |api|
+          api.mutation(action_name).input(params)
+        end
+
         new(response.result.to_h).tap do |record|
           record.graphql_errors = response.detailed_errors if !response.success? || !record.valid?
         end

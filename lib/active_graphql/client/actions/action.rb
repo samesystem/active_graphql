@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
+require 'active_graphql/client/actions/variable_detectable'
+require 'active_graphql/client/actions/action/format_outputs'
+require 'active_graphql/client/actions/action/format_inputs'
+require 'active_graphql/client/actions/action/format_variable_inputs'
+
 module ActiveGraphql
   class Client
     module Actions
       # Base class for query/mutation action objects
       class Action
-        class InvalidActionError < StandardError; end
+        include VariableDetectable
 
-        require 'active_graphql/client/actions/action/format_outputs'
-        require 'active_graphql/client/actions/action/format_inputs'
+        class InvalidActionError < StandardError; end
 
         attr_reader :name, :type, :output_values, :client, :input_attributes, :meta_attributes
 
@@ -63,12 +67,16 @@ module ActiveGraphql
           assert_format
 
           <<~TXT
-            #{type} {
+            #{type}#{wrapped_header formatted_variable_headers} {
               #{name}#{wrapped_header formatted_inputs} {
                 #{formatted_outputs}
               }
             }
           TXT
+        end
+
+        def graphql_variables
+          variable_attributes(input_attributes)
         end
 
         private
@@ -83,6 +91,10 @@ module ActiveGraphql
 
         def formatted_outputs
           FormatOutputs.new(output_values).call
+        end
+
+        def formatted_variable_headers
+          FormatVariableInputs.new(graphql_variables).call
         end
 
         def assert_format
