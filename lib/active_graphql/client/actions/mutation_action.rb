@@ -21,7 +21,7 @@ module ActiveGraphql
           response = where(inputs).response
           return response.result if response.success?
 
-          raise UnsuccessfullRequestError, response.errors.first
+          raise UnsuccessfullRequestError, response.error_messages.first
         end
       end
     end
