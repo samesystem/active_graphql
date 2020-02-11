@@ -99,6 +99,14 @@ module ActiveGraphql
         graphql_errors.each { |error| errors.add('graphql', error) }
       end
 
+      def read_attribute_for_validation(key)
+        if key == 'graphql'
+          key
+        else
+          super
+        end
+      end
+
       def primary_key
         self.class.active_graphql.primary_key
       end
