@@ -252,5 +252,60 @@ module ActiveGraphql
         end
       end
     end
+
+    describe '#errors' do
+      describe '#add' do
+        let(:record) { model.new(id: 1) }
+
+        before do
+          record.errors.add(error_attribute, error_message)
+        end
+
+        shared_examples 'can handle stringy errors' do
+          it 'contains defined error' do
+            expect(record.errors[error_attribute]).to include(error_message)
+          end
+        end
+
+        shared_examples 'can handle symbolic errors' do
+          it 'contains builds activemodel error', :aggregate_failures do
+            expect(record.errors[error_attribute].first).to include('activemodel.errors')
+            expect(record.errors[error_attribute].first).to include(error_message.to_s)
+          end
+        end
+
+        context 'when error is from graphql' do
+          let(:error_attribute) { 'graphql' }
+
+          context 'when error message is string value' do
+            let(:error_message) { 'stringy error message' }
+
+            include_examples 'can handle stringy errors'
+          end
+
+          context 'when error message is symbol' do
+            let(:error_message) { :symbolic_error }
+
+            include_examples 'can handle symbolic errors'
+          end
+        end
+
+        context 'when error is from another attribute' do
+          let(:error_attribute) { 'first_name' }
+
+          context 'when error message is string value' do
+            let(:error_message) { 'stringy error message' }
+
+            include_examples 'can handle stringy errors'
+          end
+
+          context 'when error message is symbol' do
+            let(:error_message) { :symbolic_error }
+
+            include_examples 'can handle symbolic errors'
+          end
+        end
+      end
+    end
   end
 end

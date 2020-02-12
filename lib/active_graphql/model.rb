@@ -41,7 +41,7 @@ module ActiveGraphql
         all_params = { primary_key => primary_key_value }.merge(params)
         response = exec_graphql { |api| api.mutation(action_name.to_s).input(all_params) }
         self.attributes = response.result.to_h
-        self.graphql_errors = response.errors
+        self.graphql_errors = response.error_messages
         valid?
       end
 
@@ -99,6 +99,10 @@ module ActiveGraphql
         graphql_errors.each { |error| errors.add('graphql', error) }
       end
 
+      def read_attribute_for_validation(key)
+        key == 'graphql' ? key : super
+      end
+
       def primary_key
         self.class.active_graphql.primary_key
       end
@@ -133,7 +137,7 @@ module ActiveGraphql
         response = exec_graphql { |api| api.mutation(action_name).input(params) }
 
         new(response.result.to_h).tap do |record|
-          record.graphql_errors = response.errors unless response.success?
+          record.graphql_errors = response.error_messages unless response.success?
         end
       end
 
