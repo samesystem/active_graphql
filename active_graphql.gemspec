@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Povilas Jurcys"]
   spec.email         = ["po.jurcys@gmail.com"]
 
-  spec.summary       = %q{Graphql client}
-  spec.homepage      = "https://github.com/samesystem/active_graphql"
+  spec.summary       = %q{Graphql client which lets Graphql resources to act like ActiveRecord models}
+  spec.homepage      = "https://samesystem.github.io/active_graphql"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
@@ -34,14 +34,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'graphlient', '~> 0.3'
-  spec.add_dependency 'activesupport', '>= 4.0.0'
-  spec.add_dependency 'activemodel', '>= 3.0.0'
+  spec.add_dependency 'activesupport', '>= 4.0.0', '~> 6.0'
+  spec.add_dependency 'activemodel', '>= 3.0.0', '~> 6.0'
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "webmock", "~> 3"
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rubocop", "0.75"
-  spec.add_development_dependency "rubocop-performance"
-  spec.add_development_dependency "rubocop-rspec"
+  spec.add_development_dependency "rubocop-performance", "~> 1.5"
+  spec.add_development_dependency "rubocop-rspec", "~> 1.38"
 end
