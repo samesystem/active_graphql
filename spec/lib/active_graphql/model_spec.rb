@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'graphlient/errors'
 
 module ActiveGraphql
   RSpec.describe Model do
@@ -254,9 +255,71 @@ module ActiveGraphql
     end
 
     describe '#errors' do
-      describe '#add' do
-        let(:record) { model.new(id: 1) }
+      subject(:errors) { record.errors }
 
+      let(:record) { model.find(1) }
+
+      describe 'response errors handling' do
+        let(:graphql_object) { nil }
+        let(:error_field) { 'graphql' }
+        let(:error_message) { 'Oh snap' }
+        let(:error_details) { { 'data' => [error_data] } }
+        let(:response) { ActiveGraphql::Client::Response.new(graphql_object, graphql_error) }
+        let(:graphql_error) do
+          instance_double(
+            Graphlient::Errors::GraphQLError,
+            errors: OpenStruct.new(details: error_details)
+          )
+        end
+
+        before do
+          allow(record).to receive(:exec_graphql).and_return(response)
+          record.update(first_name: 'Tom')
+        end
+
+        shared_examples 'contains graphql error' do
+          it 'contains graphql errors', :aggregate_failures do
+            expect(errors).to be_a(ActiveModel::Errors)
+            expect(errors[error_field]).to eq([error_message])
+            expect(errors.messages[error_field.to_sym]).to eq([error_message])
+            expect(errors.details[error_field.to_sym]).to eq([{ error: error_message }])
+          end
+        end
+
+        context 'when grahql error does not contain specified field' do
+          let(:error_data) { { 'message' => error_message } }
+
+          include_examples 'contains graphql error'
+        end
+
+        context 'when grahql error contains specified field' do
+          let(:error_field) { 'first_name' }
+
+          let(:error_data) do
+            {
+              'message' => error_message,
+              'field' => error_field
+            }
+          end
+
+          include_examples 'contains graphql error'
+        end
+
+        context 'when grahql error contains short message field' do
+          let(:short_error_message) { 'short_error_message' }
+          let(:error_message) { short_error_message }
+          let(:error_data) do
+            {
+              'message' => 'Long message',
+              'short_message' => short_error_message
+            }
+          end
+
+          include_examples 'contains graphql error'
+        end
+      end
+
+      describe '#add' do
         before do
           record.errors.add(error_attribute, error_message)
         end
