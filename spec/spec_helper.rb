@@ -7,8 +7,10 @@ require 'simplecov'
 SimpleCov.start do
   add_filter(/_spec.rb\Z/)
   add_filter(%r{/spec/support/*+})
+  enable_coverage :branch
 end
 
+require 'pry'
 require 'active_graphql'
 
 if ENV['CODECOV_TOKEN']

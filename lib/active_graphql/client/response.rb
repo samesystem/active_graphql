@@ -20,7 +20,7 @@ module ActiveGraphql
       end
 
       def result!
-        raise ResponseError, error_messages.first if error_messages.any?
+        raise ResponseError, errors.first if errors.any?
 
         graphql_object
       end
@@ -29,14 +29,14 @@ module ActiveGraphql
         graphql_error.nil?
       end
 
-      def errors
-        graphql_error&.errors
+      def detailed_errors
+        return [] if graphql_error.blank?
+
+        graphql_error.errors.details['data'].map(&:with_indifferent_access)
       end
 
-      def error_messages
-        return [] if errors.nil?
-
-        errors.values.flatten
+      def errors
+        detailed_errors.map { |error| error[:message] }
       end
 
       private

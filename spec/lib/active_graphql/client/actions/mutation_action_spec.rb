@@ -59,8 +59,13 @@ class ActiveGraphql::Client
         end
 
         context 'when response is not successfull' do
-          let(:error) { OpenStruct.new(errors: { 'fail': 'Ups!' }) }
           let(:result) { nil }
+          let(:error) { OpenStruct.new(errors: error_details) }
+          let(:error_details) do
+            OpenStruct.new(
+              details: { 'data' => [{ message: 'Ups!' }] }
+            )
+          end
 
           it 'raises error' do
             expect { update }.to raise_error('Ups!')
