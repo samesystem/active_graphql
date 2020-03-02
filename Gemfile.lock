@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    active_graphql (0.1.0)
+    active_graphql (0.1.1)
       activemodel (>= 3.0.0)
       activesupport (>= 4.0.0)
       graphlient (~> 0.3)
+      graphql (~> 1.9.0)
 
 GEM
   remote: https://rubygems.org/
@@ -42,14 +43,14 @@ GEM
       faraday
       faraday_middleware
       graphql-client
-    graphql (1.10.3)
+    graphql (1.9.19)
     graphql-client (0.16.0)
       activesupport (>= 3.0)
       graphql (~> 1.8)
     graphql_rails (1.0.0)
       activesupport (>= 4)
       graphql (>= 1.9.12)
-    hashdiff (1.0.0)
+    hashdiff (1.0.1)
     i18n (1.8.2)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.4)
@@ -58,7 +59,7 @@ GEM
     minitest (5.14.0)
     multipart-post (2.1.1)
     parallel (1.19.1)
-    parser (2.7.0.2)
+    parser (2.7.0.3)
       ast (~> 2.4.0)
     pry (0.12.2)
       coderay (~> 1.1.0)
@@ -95,10 +96,10 @@ GEM
       rubocop (>= 0.68.1)
     ruby-progressbar (1.10.1)
     safe_yaml (1.0.5)
-    simplecov (0.18.4)
+    simplecov (0.18.5)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
-    simplecov-html (0.12.1)
+    simplecov-html (0.12.2)
     thread_safe (0.3.6)
     tzinfo (1.2.6)
       thread_safe (~> 0.1)
