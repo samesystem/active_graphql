@@ -20,7 +20,7 @@ module ActiveGraphql
       end
 
       def result!
-        raise ResponseError, errors.first if errors.any?
+        raise ActiveGraphql::Errors::ResponseError, errors.first if errors.any?
 
         graphql_object
       end
