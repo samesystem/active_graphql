@@ -3,9 +3,11 @@
 [![codecov](https://codecov.io/gh/samesystem/active_graphql/branch/master/graph/badge.svg)](https://codecov.io/gh/samesystem/active_graphql)
 [![Documentation](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://samesystem.github.io/active_graphql)
 
+![logo](https://i.imgur.com/J1DJlqq.png)
+
 GraphQL client which allows to interact with graphql using ActiveRecord-like API
 
-Detailed documentation can be found at https://samesystem.github.io/active_graphql	
+Detailed documentation can be found at https://samesystem.github.io/active_graphql
 
 ## Installation
 
