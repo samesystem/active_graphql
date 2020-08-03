@@ -370,5 +370,69 @@ module ActiveGraphql
         end
       end
     end
+
+    describe '#save' do
+      subject(:save) { record.save }
+
+      let(:record) { model.new(params) }
+
+      context 'when model attributes contains primary key attribute' do
+        let(:params) { { id: 1, first_name: 'John Pelek' } }
+
+        before do
+          allow(record).to receive(:update)
+        end
+
+        it 'performs update mutation' do
+          save
+          expect(record).to have_received(:update).with(first_name: 'John Pelek')
+        end
+      end
+
+      context 'when model attributes does not include primary key attribute' do
+        let(:params) { { first_name: 'John Pelek' } }
+
+        before do
+          allow(record.class).to receive(:create)
+        end
+
+        it 'performs create mutation' do
+          save
+          expect(record.class).to have_received(:create).with(params)
+        end
+      end
+    end
+
+    describe '#save!' do
+      subject(:save!) { record.save! }
+
+      let(:record) { model.new(params) }
+
+      context 'when model attributes contains primary key attribute' do
+        let(:params) { { id: 1, first_name: 'John Pelek' } }
+
+        before do
+          allow(record).to receive(:update!)
+        end
+
+        it 'performs update mutation' do
+          save!
+          expect(record).to have_received(:update!).with(first_name: 'John Pelek')
+        end
+      end
+
+      context 'when model attributes does not include primary key attribute' do
+        let(:params) { { first_name: 'John Pelek' } }
+
+        before do
+          allow(record.class).to receive(:create!)
+        end
+
+        it 'performs create mutation' do
+          save!
+          expect(record.class).to have_received(:create!).with(params)
+        end
+      end
+    end
   end
 end
