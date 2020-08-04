@@ -74,6 +74,22 @@ module ActiveGraphql
         self
       end
 
+      def save
+        if primary_key_value.present?
+          update(attributes.except(primary_key))
+        else
+          self.class.create(attributes)
+        end
+      end
+
+      def save!
+        if primary_key_value.present?
+          update!(attributes.reject { |attr, _| attr == primary_key })
+        else
+          self.class.create!(attributes)
+        end
+      end
+
       protected
 
       def exec_graphql(*args, &block)
