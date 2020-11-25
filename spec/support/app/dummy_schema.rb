@@ -62,23 +62,23 @@ class DummySchema < GraphQL::Schema
   end
 
   class MutationType < GraphQL::Schema::Object
-    field :createUser, DummyUser.graphql.graphql_type, null: false, method: :create_user do
+    field :create_user, DummyUser.graphql.graphql_type, null: false, method: :create_user do
       description 'Find invoice'
       argument :input, DummyUser.graphql.input.graphql_input_type, required: true
     end
 
-    field :updateUser, DummyUser.graphql.graphql_type, null: false, method: :update_user do
+    field :update_user, DummyUser.graphql.graphql_type, null: false, method: :update_user do
       description 'Find invoice'
       argument :id, Integer, required: true
       argument :input, DummyUser.graphql.input.graphql_input_type, required: true
     end
 
-    field :destroyUser, DummyUser.graphql.graphql_type, null: false, method: :destroy_user do
+    field :destroy_user, DummyUser.graphql.graphql_type, null: false, method: :destroy_user do
       description 'Find invoice'
       argument :id, Integer, required: true
     end
 
-    field :forceUserUpdate, DummyUser.graphql.graphql_type, null: false, method: :force_user_update do
+    field :force_user_update, DummyUser.graphql.graphql_type, null: false, method: :force_user_update do
       description 'Force user update'
       argument :id, Integer, required: true
       argument :input, DummyUser.graphql.input.graphql_input_type, required: false
