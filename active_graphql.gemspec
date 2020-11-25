@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'graphql', '>= 1.9.0'
-  spec.add_dependency 'graphlient', '>= 0.3'
+  spec.add_dependency 'graphlient', '~> 0.4.0'
   spec.add_dependency 'activesupport', '>= 4.0.0'
   spec.add_dependency 'activemodel', '>= 3.0.0'
 
