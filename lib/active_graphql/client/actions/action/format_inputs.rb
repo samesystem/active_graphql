@@ -48,8 +48,6 @@ module ActiveGraphql
             formatted_attributes.join(', ')
           end
 
-          private
-
           def formatted_key_and_value(key, value, parent_keys:)
             if variable_value?(value)
               "#{key}: $#{[*parent_keys, key].compact.join('_')}"

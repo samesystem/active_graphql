@@ -12,8 +12,7 @@ module ActiveGraphql
             elsif variable_value?(value)
               value
             elsif value.is_a?(Array)
-              super_res = value.map.with_index { |val, i| [i, val] }.to_h
-              variable_attributes(super_res)
+              variable_attributes(value.map.with_index { |val, i| [i, val] }.to_h)
             end
           end
 

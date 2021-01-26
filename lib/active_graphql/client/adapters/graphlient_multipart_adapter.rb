@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'graphlient'
 require 'faraday'
 require 'faraday/request/multipart'
@@ -7,9 +9,22 @@ require 'active_graphql/client/adapters/format_multipart_variables'
 module ActiveGraphql
   class Client
     module Adapters
+      # Adapter enabling multipart data transfer
       class GraphlientMultipartAdapter < Graphlient::Adapters::HTTP::Adapter
         def execute(document:, operation_name:, variables:, context:)
-          response = connection.post do |req|
+          response = execute_request(
+            document: document, operation_name: operation_name,
+            variables: variables, context: context
+          )
+          response.body
+        rescue Faraday::ClientError => e
+          raise Graphlient::Errors::FaradayServerError, e
+        end
+
+        private
+
+        def execute_request(document:, operation_name:, variables:, context:)
+          connection.post do |req|
             req.headers.merge!(context[:headers] || {})
             req.body = {
               query: document.to_query_string,
@@ -17,13 +32,7 @@ module ActiveGraphql
               variables: FormatMultipartVariables.new(variables).call
             }
           end
-
-          response.body
-        rescue Faraday::ClientError => e
-          raise Graphlient::Errors::FaradayServerError, e
         end
-
-        private
 
         def connection
           @connection ||= Faraday.new(url: url, headers: headers) do |c|
@@ -32,11 +41,7 @@ module ActiveGraphql
             c.request :url_encoded
             c.response :json
 
-            if block_given?
-              yield c
-            else
-              c.adapter Faraday::Adapter::NetHttp
-            end
+            block_given? ? yield(c) : c.adapter(Faraday::Adapter::NetHttp)
           end
         end
       end

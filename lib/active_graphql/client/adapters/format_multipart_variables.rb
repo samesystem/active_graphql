@@ -16,7 +16,6 @@ module ActiveGraphql
         end
 
         def call
-
           deep_transform_values(variables) do |variable|
             variable_value(variable)
           end
