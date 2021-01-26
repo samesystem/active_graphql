@@ -27,7 +27,7 @@ module ActiveGraphql
 
         def connection
           @connection ||= Faraday.new(url: url, headers: headers) do |c|
-            c.use Faraday::Response::RaiseError
+            c.adapter Faraday::Response::RaiseError
             c.request :multipart
             c.request :url_encoded
             c.response :json
@@ -35,7 +35,7 @@ module ActiveGraphql
             if block_given?
               yield c
             else
-              c.use Faraday::Adapter::NetHttp
+              c.adapter Faraday::Adapter::NetHttp
             end
           end
         end
