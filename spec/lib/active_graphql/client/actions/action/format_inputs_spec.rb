@@ -90,5 +90,22 @@ RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
         end
       end
     end
+
+    context 'when value is file' do
+      context 'when file are deeply nested and wrapped in to array' do
+        let(:inputs) do
+          {
+            val: [
+              { file: File.new('/dev/null') },
+              { file: File.new('/dev/null') }
+            ]
+          }
+        end
+
+        it 'correctly parses given files input' do
+          expect(call).to eq 'val: [{ file: $val_0_file }, { file: $val_1_file }]'
+        end
+      end
+    end
   end
 end

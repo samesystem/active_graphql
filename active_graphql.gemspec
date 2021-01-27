@@ -37,6 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'graphlient', '>= 0.3'
   spec.add_dependency 'activesupport', '>= 4.0.0'
   spec.add_dependency 'activemodel', '>= 3.0.0'
+  spec.add_dependency 'mime-types', '>= 3.0'
 
   spec.add_development_dependency "bundler", "~> 2.0"
   spec.add_development_dependency "webmock", "~> 3"
