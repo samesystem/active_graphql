@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ActiveGraphql
-  VERSION = '0.2.4'
+  VERSION = '0.3'
 end
