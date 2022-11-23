@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphQL
   class Client
     def self.dump_schema(schema, io = nil, context: {})
