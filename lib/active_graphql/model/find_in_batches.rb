@@ -4,8 +4,8 @@ module ActiveGraphql
   module Model
     # fetches graphql paginated records in batches
     class FindInBatches
-      def self.call(*args, &block)
-        new(*args).call(&block)
+      def self.call(*args, **kwargs, &block)
+        new(*args, **kwargs).call(&block)
       end
 
       def initialize(relation, batch_size: 100, fetched_items_count: 0)

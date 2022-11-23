@@ -10,7 +10,7 @@ module ActiveGraphql
         end
 
         def find_by(inputs)
-          where(inputs).result
+          where(**inputs).result
         end
 
         def select_paginated(*array_outputs, **hash_outputs)

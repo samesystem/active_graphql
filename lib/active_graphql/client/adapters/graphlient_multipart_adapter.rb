@@ -2,8 +2,7 @@
 
 require 'graphlient'
 require 'faraday'
-require 'faraday/request/multipart'
-require 'faraday_middleware'
+require 'faraday/multipart'
 require 'active_graphql/client/adapters/format_multipart_variables'
 
 module ActiveGraphql

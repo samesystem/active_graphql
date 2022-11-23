@@ -14,11 +14,11 @@ module ActiveGraphql
         end
 
         def update(inputs)
-          where(inputs).response
+          where(**inputs).response
         end
 
         def update!(inputs)
-          response = where(inputs).response
+          response = where(**inputs).response
           return response.result if response.success?
 
           raise UnsuccessfullRequestError, response.errors.first

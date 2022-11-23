@@ -6,6 +6,7 @@ module ActiveGraphql
       # Client which makes raw API requests to GraphQL server
       class GraphlientAdapter
         require 'graphlient'
+        require_relative './graphql_client_patch'
         require_relative './graphlient_multipart_adapter'
 
         def initialize(config)

@@ -30,8 +30,8 @@ module ActiveGraphql
 
       validate :validate_graphql_errors
 
-      attr_reader :attributes
-      attr_writer :graphql_errors
+      attr_reader :attributes, :graphql
+      attr_writer :graphql_errors, :graphql
 
       def initialize(attributes)
         @attributes = attributes.deep_transform_keys { |it| it.to_s.underscore.to_sym }
@@ -39,7 +39,7 @@ module ActiveGraphql
 
       def mutate(action_name, params = {})
         all_params = { primary_key => primary_key_value }.merge(params)
-        response = exec_graphql { |api| api.mutation(action_name.to_s).input(all_params) }
+        response = exec_graphql { |api| api.mutation(action_name.to_s).input(**all_params) }
         self.attributes = response.result.to_h
         self.graphql_errors = response.detailed_errors
         valid?
@@ -90,6 +90,10 @@ module ActiveGraphql
         end
       end
 
+      def read_attribute_for_validation(key)
+        key == 'graphql' ? key : super
+      end
+
       protected
 
       def exec_graphql(*args, &block)
@@ -118,10 +122,6 @@ module ActiveGraphql
 
           errors.add(error_key, error_message)
         end
-      end
-
-      def read_attribute_for_validation(key)
-        key == 'graphql' ? key : super
       end
 
       def primary_key
@@ -156,7 +156,7 @@ module ActiveGraphql
       def create(params)
         action_name = "create_#{active_graphql.resource_name}"
         response = exec_graphql do |api|
-          api.mutation(action_name).input(params)
+          api.mutation(action_name).input(**params)
         end
 
         new(response.result.to_h).tap do |record|

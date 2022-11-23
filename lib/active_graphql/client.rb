@@ -31,6 +31,27 @@ module ActiveGraphql
       end
     end
 
+    def self.dump_schema(schema, io = nil, context: {})
+      unless schema.respond_to?(:execute)
+        raise TypeError, "expected schema to respond to #execute(), but was #{schema.class}"
+      end
+
+      result = JSON.parse(schema.execute(
+        document: IntrospectionDocument,
+        operation_name: "IntrospectionQuery",
+        variables: {},
+        context: context
+      ))
+
+      if io
+        io = File.open(io, "w") if io.is_a?(String)
+        io.write(JSON.pretty_generate(result))
+        io.close_write
+      end
+
+      result
+    end
+
     private
 
     attr_reader :config

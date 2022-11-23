@@ -150,8 +150,8 @@ module ActiveGraphql
         self
       end
 
-      def find_in_batches(*args, &block)
-        FindInBatches.call(meta(paginated: true), *args, &block)
+      def find_in_batches(*args, **kwargs, &block)
+        FindInBatches.call(meta(paginated: true), *args, **kwargs, &block)
       end
 
       def to_a
@@ -256,7 +256,7 @@ module ActiveGraphql
             .query(resource_plural_name)
             .meta(meta_attributes)
             .select(select_attributes)
-            .where(graphql_params)
+            .where(**graphql_params)
         end
       end
 
