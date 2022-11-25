@@ -7,12 +7,14 @@ module GraphQL
         raise TypeError, "expected schema to respond to #execute(), but was #{schema.class}"
       end
 
-      result = JSON.parse(schema.execute(
+      result = schema.execute(
         document: IntrospectionDocument,
         operation_name: "IntrospectionQuery",
         variables: {},
         context: context
-      ))
+      )
+
+      result = JSON.parse(result) if result.is_a?(String)
 
       if io
         io = File.open(io, "w") if io.is_a?(String)
@@ -47,14 +49,16 @@ module GraphQL
         context: context
       }
 
-      result = JSON.parse(ActiveSupport::Notifications.instrument("query.graphql", payload) do
+      result = ActiveSupport::Notifications.instrument("query.graphql", payload) do
         execute.execute(
           document: document,
           operation_name: operation.name,
           variables: variables,
           context: context
         )
-      end)
+      end
+
+      result = JSON.parse(result) if result.is_a?(String)
 
       deep_freeze_json_object(result)
 
