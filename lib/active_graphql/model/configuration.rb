@@ -4,6 +4,7 @@ module ActiveGraphql
   module Model
     # stores all information for how to handle graphql requets for model
     class Configuration
+      # stores attribute information for how to handle graphql requets for model
       class Attribute
         attr_reader :name, :nesting, :decorate_with
 
@@ -34,7 +35,7 @@ module ActiveGraphql
 
       def graphql_client(client = nil)
         @graphql_client = client if client
-        @graphql_client ||= ActiveGraphql::Client.new(url: url)
+        @graphql_client ||= ActiveGraphql::Client.new(url:)
       end
 
       def formatter(new_formatter = nil, &block)
@@ -53,7 +54,7 @@ module ActiveGraphql
       end
 
       def attribute(name, nesting = nil, decorate_with: nil)
-        @attributes << Attribute.new(name, nesting: nesting, decorate_with: decorate_with)
+        @attributes << Attribute.new(name, nesting:, decorate_with:)
       end
 
       def url(value = nil)

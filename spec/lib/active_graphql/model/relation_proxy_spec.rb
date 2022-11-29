@@ -340,7 +340,7 @@ module ActiveGraphql::Model
         end
       end
 
-      context 'with single attribute' do
+      context 'with multiple attributes' do
         let(:pluckable_attributes) { %i[id first_name] }
 
         it 'returns two dimentional list' do

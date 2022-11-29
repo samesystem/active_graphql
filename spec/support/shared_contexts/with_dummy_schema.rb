@@ -3,7 +3,7 @@
 RSpec.shared_context 'with DummySchema' do
   let(:graphql_url) { 'http://example.com/graphql' }
 
-  let!(:introspection_request) do
+  let(:introspection_request) do
     stub_request(:post, graphql_url)
       .to_return do |request|
         params = JSON.parse(request.body)
@@ -15,5 +15,9 @@ RSpec.shared_context 'with DummySchema' do
           ).to_json
         }
       end
+  end
+
+  before do
+    introspection_request
   end
 end

@@ -15,7 +15,7 @@ module ActiveGraphql
   # RemoteUser.where(...).count
   #
   # Model expects that graphql has GraphqlRails CRUD actions with default naming (createRemoteUser, remoteUsers, etc.)
-  module Model
+  module Model # rubocop:disable Metrics/ModuleLength
     require 'active_graphql/model/configuration'
     require 'active_graphql/model/action_formatter'
     require 'active_graphql/model/relation_proxy'
@@ -137,6 +137,7 @@ module ActiveGraphql
       delegate :first, :last, :limit, :count, :where, :select, :select_attributes, :find_each, :find, to: :all
 
       def inherited(sublass)
+        super
         sublass.instance_variable_set(:@active_graphql, active_graphql.dup)
       end
 

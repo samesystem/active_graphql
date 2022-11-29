@@ -17,11 +17,11 @@ module ActiveGraphql
     end
 
     def query(name)
-      Actions::QueryAction.new(name: name, client: adapter)
+      Actions::QueryAction.new(name:, client: adapter)
     end
 
     def mutation(name)
-      Actions::MutationAction.new(name: name, client: adapter)
+      Actions::MutationAction.new(name:, client: adapter)
     end
 
     def adapter

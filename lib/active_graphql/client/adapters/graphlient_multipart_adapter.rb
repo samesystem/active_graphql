@@ -11,10 +11,7 @@ module ActiveGraphql
       # Adapter enabling multipart data transfer
       class GraphlientMultipartAdapter < Graphlient::Adapters::HTTP::Adapter
         def execute(document:, operation_name:, variables:, context:)
-          response = execute_request(
-            document: document, operation_name: operation_name,
-            variables: variables, context: context
-          )
+          response = execute_request(document:, operation_name:, variables:, context:)
           response.body
         rescue Faraday::ClientError => e
           raise Graphlient::Errors::FaradayServerError, e
@@ -34,7 +31,7 @@ module ActiveGraphql
         end
 
         def connection
-          @connection ||= Faraday.new(url: url, headers: headers) do |c|
+          @connection ||= Faraday.new(url:, headers:) do |c|
             c.adapter Faraday::Response::RaiseError
             c.request :multipart
             c.request :url_encoded
