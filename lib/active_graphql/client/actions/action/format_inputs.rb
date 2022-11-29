@@ -24,7 +24,7 @@ module ActiveGraphql
 
           def formatted(attributes, parent_keys: [])
             if attributes.is_a?(Hash)
-              formatted_attributes(attributes, parent_keys: parent_keys)
+              formatted_attributes(attributes, parent_keys:)
             else
               raise(
                 ActiveGraphql::Client::Actions::WrongTypeError,
@@ -39,9 +39,9 @@ module ActiveGraphql
 
             formatted_attributes = attributes.map do |key, val|
               if keyword_fields.include?(key.to_s)
-                formatted_key_and_keyword(key, val, parent_keys: parent_keys)
+                formatted_key_and_keyword(key, val, parent_keys:)
               else
-                formatted_key_and_value(key, val, parent_keys: parent_keys)
+                formatted_key_and_value(key, val, parent_keys:)
               end
             end
 
@@ -67,7 +67,7 @@ module ActiveGraphql
           def formatted_value(value, parent_keys:) # rubocop:disable Metrics/MethodLength
             case value
             when Hash
-              "{ #{formatted(value, parent_keys: parent_keys)} }"
+              "{ #{formatted(value, parent_keys:)} }"
             when Array
               formatted_values = value.map.with_index do |it, idx|
                 formatted_value(it, parent_keys: [*parent_keys, idx])

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# rubocop:disable all
+# Required for graphql-client (dependency of graphlient which is dependency of active_graphql)
+# If graphql-client gets upgraded, remove and try again without this patch
 module GraphQL
   class Client
     def self.dump_schema(schema, io = nil, context: {})
@@ -82,3 +85,4 @@ module GraphQL
     end
   end
 end
+# rubocop:enable all

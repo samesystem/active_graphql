@@ -8,7 +8,7 @@ module ActiveGraphql::Model
     include_context 'with DummySchema'
     include_context 'with many records'
 
-    subject(:find_in_batches) { described_class.new(relation, batch_size: batch_size) }
+    subject(:find_in_batches) { described_class.new(relation, batch_size:) }
 
     let(:batch_size) { 100 }
 

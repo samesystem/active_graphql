@@ -31,7 +31,7 @@ module ActiveGraphql
       def fetch_next_batch(items_count:, &block)
         self.class.call(
           relation,
-          batch_size: batch_size,
+          batch_size:,
           fetched_items_count: fetched_items_count + items_count,
           &block
         )
