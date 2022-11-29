@@ -36,7 +36,7 @@ module ActiveGraphql
         end
 
         def rewhere(**input_attributes)
-          chain(input_attributes: input_attributes)
+          chain(input_attributes:)
         end
 
         def where(**extra_input_attributes)
@@ -108,11 +108,11 @@ module ActiveGraphql
 
         def chain(**new_values)
           self.class.new(
-            name: name,
-            output_values: output_values,
-            input_attributes: input_attributes,
-            meta_attributes: meta_attributes,
-            client: client,
+            name:,
+            output_values:,
+            input_attributes:,
+            meta_attributes:,
+            client:,
             **new_values
           )
         end

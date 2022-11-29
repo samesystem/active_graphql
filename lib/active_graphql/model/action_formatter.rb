@@ -81,12 +81,11 @@ module ActiveGraphql
       end
 
       def formatted_output_values(attributes)
-        if attributes.is_a?(Array)
-          attributes.map { |it| formatted_output_values(it) }
-        elsif attributes.is_a?(Hash)
-          attributes
-            .transform_keys { |key| formatted_output_values(key) }
-            .transform_values { |value| formatted_output_values(value) }
+        case attributes
+        when Array then attributes.map { |it| formatted_output_values(it) }
+        when Hash then attributes
+          .transform_keys { |key| formatted_output_values(key) }
+          .transform_values { |value| formatted_output_values(value) }
         else
           attributes.to_s.camelize(:lower)
         end

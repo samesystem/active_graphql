@@ -10,7 +10,7 @@ class ActiveGraphql::Client
       let(:result) do
         OpenStruct.new(obj: Object.new) do
           def to_h(*)
-            { obj: obj }
+            { obj: }
           end
         end
       end
@@ -79,7 +79,7 @@ class ActiveGraphql::Client
         subject(:to_graphql) { mutation.select(:shop).to_graphql }
 
         context 'when inputs does not contain files' do
-          it 'formats correct graphql code' do # rubocop:disable RSpec/ExampleLength
+          it 'formats correct graphql code' do
             expect(to_graphql).to eq <<~GRAPHQL
               mutation {
                 createAccessToken {
@@ -93,7 +93,7 @@ class ActiveGraphql::Client
         context 'when input attributes includes file' do
           subject(:to_graphql) { mutation.where(file: File.new('/dev/null')).select(:shop).to_graphql }
 
-          it 'formats correct graphql code' do # rubocop:disable RSpec/ExampleLength
+          it 'formats correct graphql code' do
             expect(to_graphql).to eq <<~GRAPHQL
               mutation($file: File!) {
                 createAccessToken(file: $file) {
@@ -111,7 +111,7 @@ class ActiveGraphql::Client
                     .to_graphql
           end
 
-          it 'formats correct graphql code' do # rubocop:disable RSpec/ExampleLength
+          it 'formats correct graphql code' do
             expect(to_graphql).to eq <<~GRAPHQL
               mutation($input_file: File!) {
                 createAccessToken(input: { file: $input_file }) {
@@ -125,7 +125,7 @@ class ActiveGraphql::Client
         context 'when input attributes includes files list' do
           subject(:to_graphql) { mutation.where(files: [File.new('/dev/null')]).select(:shop).to_graphql }
 
-          it 'formats correct graphql code' do # rubocop:disable RSpec/ExampleLength
+          it 'formats correct graphql code' do
             expect(to_graphql).to eq <<~GRAPHQL
               mutation($files: [File!]!) {
                 createAccessToken(files: $files) {
@@ -138,7 +138,7 @@ class ActiveGraphql::Client
       end
 
       describe '#update' do
-        subject(:update) { mutation.select(:token).update(email: email, password: 'password') }
+        subject(:update) { mutation.select(:token).update(email:, password: 'password') }
 
         it 'makes request' do
           update
@@ -147,7 +147,7 @@ class ActiveGraphql::Client
       end
 
       describe '#update!' do
-        subject(:update) { mutation.select(:token).update!(email: email, password: 'password') }
+        subject(:update) { mutation.select(:token).update!(email:, password: 'password') }
 
         it 'makes request' do
           update

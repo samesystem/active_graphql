@@ -17,14 +17,14 @@ module ActiveGraphql
 
       delegate :each, :map, to: :to_a
 
-      def initialize(model, limit_number: nil, where_attributes: {}, offset_number: nil, meta_attributes: {}, order_attributes: [], output_values: [])
+      def initialize(model, **params)
         @model = model
-        @limit_number = limit_number
-        @where_attributes = where_attributes
-        @offset_number = offset_number
-        @meta_attributes = meta_attributes
-        @order_attributes = order_attributes
-        @output_values = output_values
+        @limit_number = params[:limit_number]
+        @where_attributes = params[:where_attributes] || {}
+        @offset_number = params[:offset_number]
+        @meta_attributes = params[:meta_attributes] || {}
+        @order_attributes = params[:order_attributes] || []
+        @output_values = params[:output_values] || []
       end
 
       def all
@@ -32,11 +32,11 @@ module ActiveGraphql
       end
 
       def limit(limit_number)
-        chain(limit_number: limit_number)
+        chain(limit_number:)
       end
 
       def offset(offset_number)
-        chain(offset_number: offset_number)
+        chain(offset_number:)
       end
 
       def where(new_where_attributes)
@@ -76,7 +76,7 @@ module ActiveGraphql
       def paginate(page: nil, per_page: 100)
         page_number = [page.to_i, 1].max
         offset = (page_number - 1) * per_page
-        limit(per_page).offset(offset).meta(current_page: page_number, per_page: per_page)
+        limit(per_page).offset(offset).meta(current_page: page_number, per_page:)
       end
 
       def current_page
@@ -143,15 +143,15 @@ module ActiveGraphql
         end
       end
 
-      def find_each(batch_size: DEFAULT_BATCH_SIZE)
-        find_in_batches(batch_size: batch_size) do |items|
-          items.each { |item| yield(item) }
+      def find_each(batch_size: DEFAULT_BATCH_SIZE, &block)
+        find_in_batches(batch_size:) do |items|
+          items.each(&block)
         end
         self
       end
 
-      def find_in_batches(*args, &block)
-        FindInBatches.call(meta(paginated: true), *args, &block)
+      def find_in_batches(*args, **kwargs, &block)
+        FindInBatches.call(meta(paginated: true), *args, **kwargs, &block)
       end
 
       def to_a
@@ -193,9 +193,10 @@ module ActiveGraphql
       end
 
       def order_params_attributes(order_params)
-        send(:order_attributes) + order_params.compact
-          .flat_map { |order_param| ordering_attributes(order_param) }
-          .select(&:compact)
+        send(:order_attributes) + order_params
+                                  .compact
+                                  .flat_map { |order_param| ordering_attributes(order_param) }
+                                  .select(&:compact)
       end
 
       def ordering_attributes(order_param)
@@ -251,13 +252,11 @@ module ActiveGraphql
       end
 
       def raw
-        @raw ||= begin
-          graphql_client
-            .query(resource_plural_name)
-            .meta(meta_attributes)
-            .select(select_attributes)
-            .where(graphql_params)
-        end
+        @raw ||= graphql_client
+                 .query(resource_plural_name)
+                 .meta(meta_attributes)
+                 .select(select_attributes)
+                 .where(**graphql_params)
       end
 
       def formatted_action(action)
@@ -286,7 +285,7 @@ module ActiveGraphql
         end
       end
 
-      def chain(
+      def chain( # rubocop:disable Metrics/ParameterLists
         limit_number: send(:limit_number),
         where_attributes: send(:where_attributes),
         meta_attributes: send(:meta_attributes),
@@ -296,12 +295,12 @@ module ActiveGraphql
       )
         self.class.new(
           model,
-          limit_number: limit_number,
-          where_attributes: where_attributes,
-          meta_attributes: meta_attributes,
-          offset_number: offset_number,
-          order_attributes: order_attributes,
-          output_values: output_values
+          limit_number:,
+          where_attributes:,
+          meta_attributes:,
+          offset_number:,
+          order_attributes:,
+          output_values:
         )
       end
 

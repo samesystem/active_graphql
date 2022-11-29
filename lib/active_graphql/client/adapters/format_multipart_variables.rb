@@ -38,12 +38,10 @@ module ActiveGraphql
         end
 
         def variable_value(variable)
-          if variable.is_a?(Array)
-            variable.map { |it| variable_value(it) }
-          elsif variable.is_a?(Hash)
-            variable.transform_values { |it| variable_value(it) }
-          elsif variable.is_a?(File)
-            file_variable_value(variable)
+          case variable
+          when Array then variable.map { |it| variable_value(it) }
+          when Hash then variable.transform_values { |it| variable_value(it) }
+          when File then file_variable_value(variable)
           else
             variable
           end

@@ -56,7 +56,7 @@ module ActiveGraphql::Model
         it 'keeps "or" part and adds additional fields' do
           expect(call.where_attributes).to eq(
             shared: true,
-            or: { type: 'left', right: true, left: true },
+            or: { type: 'left', right: true, left: true }
           )
         end
       end

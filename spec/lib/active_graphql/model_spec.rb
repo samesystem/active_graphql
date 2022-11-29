@@ -3,17 +3,17 @@
 require 'spec_helper'
 require 'graphlient/errors'
 
+class ParentDummyModel
+  include ActiveGraphql::Model
+
+  active_graphql do |c|
+    c.resource_name :parent_user
+    c.url 'http://example.com/graphql'
+  end
+end
+
 module ActiveGraphql
   RSpec.describe Model do
-    class ParentDummyModel
-      include ActiveGraphql::Model
-
-      active_graphql do |c|
-        c.resource_name :parent_user
-        c.url 'http://example.com/graphql'
-      end
-    end
-
     subject(:model) do
       Class.new(ParentDummyModel) do
         def self.name
@@ -50,7 +50,7 @@ module ActiveGraphql
     end
 
     describe '#create' do
-      subject(:create) { model.create(first_name: first_name) }
+      subject(:create) { model.create(first_name:) }
 
       let(:first_name) { 'Monica' }
 
@@ -68,7 +68,7 @@ module ActiveGraphql
     end
 
     describe '#create!' do
-      subject(:create) { model.create!(first_name: first_name) }
+      subject(:create) { model.create!(first_name:) }
 
       let(:first_name) { 'Monica' }
 
@@ -199,7 +199,7 @@ module ActiveGraphql
     describe '#reload' do
       subject(:reload) { record.reload }
 
-      let(:record) { model.new(id: 1, first_name: first_name) }
+      let(:record) { model.new(id: 1, first_name:) }
       let(:first_name) { 'John' }
 
       context 'when request is successful' do

@@ -18,7 +18,7 @@ class DummySchema < GraphQL::Schema
 
   def self.users
     [%w[John Doe], %w[Ana Smith], %w[Bob Willson]].map.with_index do |(first_name, last_name), i|
-      DummyUser.new(id: i + 1, first_name: first_name, last_name: last_name, parent_id: i)
+      DummyUser.new(id: i + 1, first_name:, last_name:, parent_id: i)
     end
   end
 
@@ -87,7 +87,7 @@ class DummySchema < GraphQL::Schema
     def update_user(id:, input:)
       raise(GraphQL::ExecutionError, 'invalid user') if input[:first_name] == 'invalid'
 
-      DummyUser.new(input.to_h.merge(id: id))
+      DummyUser.new(input.to_h.merge(id:))
     end
 
     def destroy_user(id:)
@@ -105,7 +105,7 @@ class DummySchema < GraphQL::Schema
     def force_user_update(id:, input: {})
       raise(GraphQL::ExecutionError, 'invalid user') if input[:first_name] == 'invalid'
 
-      DummyUser.new(input.to_h.merge(id: id))
+      DummyUser.new(input.to_h.merge(id:))
     end
   end
 

@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe ActiveGraphql::Client::Actions::QueryAction do
   subject(:action) { initial_action }
 
-  let(:initial_action) { described_class.new(name: name, client: authenticator_client) }
+  let(:initial_action) { described_class.new(name:, client: authenticator_client) }
   let(:name) { :findUser }
   let(:authenticator_client) do
     instance_double(ActiveGraphql::Client::Adapters::GraphlientAdapter, post: response_mock)
@@ -45,7 +45,7 @@ RSpec.describe ActiveGraphql::Client::Actions::QueryAction do
   describe '#select_paginated' do
     subject(:select_paginated) { action.select_paginated(:name) }
 
-    it 'generates graphql for paginated data fetching' do # rubocop:disable RSpec/ExampleLength
+    it 'generates graphql for paginated data fetching' do
       expect(select_paginated.to_graphql).to eq <<~GRAPHQL
         query {
           findUser {
