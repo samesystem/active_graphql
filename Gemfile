@@ -6,7 +6,6 @@ source 'https://rubygems.org'
 
 group :test do
   gem 'activerecord'
-  gem 'codecov', require: false
   gem 'graphql_rails', '>= 2.2.0'
   gem 'pry-byebug'
   gem 'simplecov', require: false

@@ -12,12 +12,6 @@ end
 
 require 'pry'
 require 'active_graphql'
-
-if ENV['CODECOV_TOKEN']
-  require 'codecov'
-  SimpleCov.formatter = SimpleCov::Formatter::Codecov
-end
-
 require 'webmock/rspec'
 WebMock.disable_net_connect!
 

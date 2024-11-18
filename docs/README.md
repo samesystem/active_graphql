@@ -1,6 +1,5 @@
 # ActiveGraphql
 [![Build Status](https://travis-ci.com/samesystem/active_graphql.svg?branch=master)](https://travis-ci.com/samesystem/active_graphql)
-[![codecov](https://codecov.io/gh/samesystem/active_graphql/branch/master/graph/badge.svg)](https://codecov.io/gh/samesystem/active_graphql)
 [![Documentation](https://readthedocs.org/projects/ansicolortags/badge/?version=latest)](https://samesystem.github.io/active_graphql)
 
 ![logo](https://i.imgur.com/J1DJlqq.png)
