@@ -1,24 +1,11 @@
 # frozen_string_literal: true
 
+require_relative 'attribute'
+
 module ActiveGraphql
   module Model
     # stores all information for how to handle graphql requets for model
     class Configuration
-      # stores attribute information for how to handle graphql requets for model
-      class Attribute
-        attr_reader :name, :nesting, :decorate_with
-
-        def initialize(name, nesting: nil, decorate_with: nil)
-          @name = name.to_sym
-          @nesting = nesting
-          @decorate_with = decorate_with
-        end
-
-        def to_graphql_output
-          nesting ? { name => nesting } : name
-        end
-      end
-
       def initialize
         @attributes = []
         @primary_key = :id
@@ -50,7 +37,11 @@ module ActiveGraphql
       end
 
       def attributes_graphql_output
-        attributes.map(&:to_graphql_output)
+        outputs = attributes.map(&:to_graphql_output)
+        keywords = outputs.select(&:keyword?).map(&:to_graphql_output)
+        keyword_output = keywords.any? ? { __keyword_attributes: keywords } : nil
+
+        outputs + [keyword_output].compact
       end
 
       def attribute(name, nesting = nil, decorate_with: nil)
