@@ -16,7 +16,7 @@ class ActiveGraphql::Client
       end
 
       let(:action_name) { 'createAccessToken' }
-      let(:action_client) { instance_double(Adapters::GraphlientAdapter, post: response) }
+      let(:action_client) { instance_double(Adapters::GraphlientAdapter, post: response, config: {}) }
       let(:response) { Response.new(result, error) }
       let(:email) { 'test@example.com' }
       let(:error) { nil }

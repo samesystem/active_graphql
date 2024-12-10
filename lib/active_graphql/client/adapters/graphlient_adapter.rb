@@ -9,6 +9,8 @@ module ActiveGraphql
         require_relative './graphql_client_patch'
         require_relative './graphlient_multipart_adapter'
 
+        attr_reader :config
+
         def initialize(config)
           @url = config[:url]
           @config = config
@@ -29,7 +31,7 @@ module ActiveGraphql
 
         private
 
-        attr_reader :url, :config
+        attr_reader :url
 
         def graphql_client
           @graphql_client ||= Graphlient::Client.new(url, **adapter_config)

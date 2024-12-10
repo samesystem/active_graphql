@@ -86,7 +86,7 @@ module ActiveGraphql
         end
 
         def formatted_inputs
-          FormatInputs.new(input_attributes).call
+          FormatInputs.new(input_attributes, client:).call
         end
 
         def formatted_outputs

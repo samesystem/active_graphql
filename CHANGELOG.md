@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 * Added/Changed/Deprecated/Removed/Fixed/Security: YOUR CHANGE HERE
+* Added: automatic conversion from symbols to keywords setting
 * Added: relation.empty?, relation.blank?, relation.present? methods
 * Added: fields now can be marked as "keywords"
 * Added: it's possible to set order for relation

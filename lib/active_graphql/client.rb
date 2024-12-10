@@ -11,6 +11,8 @@ module ActiveGraphql
     require 'active_graphql/client/adapters'
     require 'active_graphql/client/response'
 
+    attr_reader :config
+
     def initialize(config)
       @config = config.dup
       @adapter_class = @config.delete(:adapter)
@@ -30,9 +32,5 @@ module ActiveGraphql
         adapter_builder.new(config)
       end
     end
-
-    private
-
-    attr_reader :config
   end
 end
