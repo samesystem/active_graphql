@@ -32,6 +32,28 @@ RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
           expect(call).to eq 'val: yes'
         end
       end
+
+      context 'when client does not respond to config' do
+        let(:client) { nil }
+
+        it 'converts Symbol values to strings' do
+          expect(call).to eq 'val: "yes"'
+        end
+      end
+
+      context 'when client has config as private method' do
+        let(:client_class) do
+          Class.new(ActiveGraphql::Client::Adapters::GraphlientAdapter) do
+            private :config
+          end
+        end
+
+        let(:client) { client_class.new(client_config) }
+
+        it 'converts Symbol values to strings' do
+          expect(call).to eq 'val: "yes"'
+        end
+      end
     end
 
     context 'when value is nested hash' do

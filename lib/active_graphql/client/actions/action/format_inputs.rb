@@ -24,7 +24,7 @@ module ActiveGraphql
           attr_reader :inputs, :client
 
           def treat_symbol_as_keyword?
-            client.config[:treat_symbol_as_keyword]
+            client.respond_to?(:config) && client.config[:treat_symbol_as_keyword]
           end
 
           def formatted(attributes, parent_keys: [])
