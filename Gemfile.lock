@@ -69,6 +69,7 @@ GEM
       byebug (~> 11.0)
       pry (>= 0.13, < 0.15)
     public_suffix (5.0.0)
+    racc (1.8.1)
     rainbow (3.1.1)
     rake (13.0.6)
     regexp_parser (2.6.1)
@@ -126,8 +127,8 @@ DEPENDENCIES
   activerecord
   bundler (~> 2.0)
   graphql_rails (>= 2.2.0)
-  pry
   pry-byebug
+  racc
   rake (~> 13.0)
   rspec (~> 3.4)
   rubocop (= 1.39.0)

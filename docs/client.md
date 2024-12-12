@@ -8,11 +8,35 @@ to initialize graphql client, simply create new client instance with url:
 client = ActiveGraphql::Client.new(url: 'http://example.com/graphql')
 ```
 
-you can also provide extra options which will be accepted by addapter, like this:
+you can also provide extra options which will be accepted by adapter, like this:
 
 ```ruby
 client = ActiveGraphql::Client.new(url: 'http://example.com/graphql', headers: {}, schema_path: '...')
 ```
+
+### `treat_symbol_as_keyword` option
+
+By default, ActiveGraphql converts all String/Symbol values to GraphQL strings. This creates a challenge when working with GraphQL Enums. To bypass this issue, you can pass `treat_symbol_as_keyword` option so symbol values will be converted to GraphQL keywords (enum values).
+
+```ruby
+default_client = ActiveGraphql::Client.new(url: 'http://example.com/graphql')
+default_client.query(:users).select(:name).(status: :ACTIVE).to_graphql
+# =>
+#   query {
+#     users(status: "ACTIVE") {
+#       status
+#     }
+#   }
+
+client = ActiveGraphql::Client.new(url: 'http://example.com/graphql', treat_symbol_as_keyword: true)
+client.query(:users).select(:name).(status: :ACTIVE).to_graphql
+# =>
+#   query {
+#     users(status: ACTIVE) {
+#       status
+#     }
+#   }
+
 
 ## query and mutation actions
 

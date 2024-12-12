@@ -3,9 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
-  subject(:format_inputs) { described_class.new(inputs) }
+  subject(:format_inputs) { described_class.new(inputs, client:) }
 
   let(:inputs) { {} }
+  let(:client) { ActiveGraphql::Client::Adapters::GraphlientAdapter.new(client_config)}
+  let(:client_config) { { url: 'http://example.com/graphql' } }
 
   describe '#call' do
     subject(:call) { format_inputs.call }
@@ -17,8 +19,18 @@ RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
     context 'when value is symbol' do
       let(:inputs) { { val: :yes } }
 
-      it 'convers Symbol values to strings' do
-        expect(call).to eq 'val: "yes"'
+      context 'when treat_symbol_as_keyword is false or not set' do
+        it 'converts Symbol values to strings' do
+          expect(call).to eq 'val: "yes"'
+        end
+      end
+
+      context 'when treat_symbol_as_keyword is true' do
+        let(:client_config) { super().merge(treat_symbol_as_keyword: true) }
+
+        it 'converts Symbol values to keywords' do
+          expect(call).to eq 'val: yes'
+        end
       end
     end
 
@@ -85,7 +97,7 @@ RSpec.describe ActiveGraphql::Client::Actions::Action::FormatInputs do
       context 'when value is symbol' do
         let(:inputs) { { val: :YES, __keyword_attributes: [:val] } }
 
-        it 'convers Symbol values to strings' do
+        it 'converts Symbol values to strings' do
           expect(call).to eq 'val: YES'
         end
       end
