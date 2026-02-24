@@ -45,7 +45,7 @@ module ActiveGraphql
         alias input where
 
         def response
-          client.post(self)
+          @response ||= client.post(self)
         end
 
         def meta(new_attributes)
