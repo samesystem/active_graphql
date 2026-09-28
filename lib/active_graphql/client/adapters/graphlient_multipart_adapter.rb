@@ -12,12 +12,19 @@ module ActiveGraphql
       class GraphlientMultipartAdapter < Graphlient::Adapters::HTTP::Adapter
         def execute(document:, operation_name:, variables:, context:)
           response = execute_request(document:, operation_name:, variables:, context:)
+          raise_server_error(response) if response.status >= 500
+
           response.body
-        rescue Faraday::ClientError => e
+        rescue Faraday::ClientError, Faraday::ServerError => e
           raise Graphlient::Errors::FaradayServerError, e
         end
 
         private
+
+        # 4xx bodies may still carry GraphQL errors, so only 5xx are treated as transport failures.
+        def raise_server_error(response)
+          raise Faraday::ServerError.new("the server responded with status #{response.status}", response.to_hash)
+        end
 
         def execute_request(document:, operation_name:, variables:, context:)
           connection.post do |req|
@@ -32,7 +39,6 @@ module ActiveGraphql
 
         def connection
           @connection ||= Faraday.new(url:, headers:) do |c|
-            c.adapter Faraday::Response::RaiseError
             c.request :multipart
             c.request :url_encoded
             c.response :json
